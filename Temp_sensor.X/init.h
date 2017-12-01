@@ -39,19 +39,19 @@ void init_GPIO(void) {
 void init_OSC(void) {
     OSCCONbits.IRCF = 7;    // 500kHz MF selected
     OSCCONbits.SCS = 2;     // Internal oscillator block
-    
     // XTAL = 500KHz, efficient 125kHz
+    
     PR2 = 0xFA;
     T2CONbits.TMR2ON = 1;   //Timer2 is on
     T2CONbits.T2CKPS = 0;   // Prescaler is 1
     T2CONbits.T2OUTPS = 4;  // 1:5 Postscaler*/
-
+    // 100Hz interrupt
 
 }
 
 void init_interrupt(void){
     // General Interruption configuration
-    INTCONbits.GIE = 0;        // Enables all active interrupts
+    INTCONbits.GIE = 1;        // Enables all active interrupts
     INTCONbits.PEIE = 1;       // Enables all active peripheral interrupts 
     
     // timer2 Interruption configuration
@@ -60,10 +60,13 @@ void init_interrupt(void){
 
 void init_UART(void)
 {
+    SSP1CON1bits.SSPEN = 0;
+    SSP2CON1bits.SSPEN = 0;
+    
     TXSTAbits.TX9 = 0;          // Selected 8-bits transmission
     TXSTAbits.TXEN = 1;         // Transmit enable
     TXSTAbits.SYNC = 0;         // Asynchronous mode
-    TXSTAbits.BRGH = 1;         // Baud rate low speed
+    TXSTAbits.BRGH = 1;         // Baud rate high speed
     
     RCSTAbits.SPEN = 1;         // Serial port enable
     RCSTAbits.RX9 = 0;          // Selected 8-bits reception
@@ -71,6 +74,11 @@ void init_UART(void)
 
     BAUDCONbits.BRG16 = 1;      // 16-bits Baud Rate Generator is used
     BAUDCONbits.SCKP = 0;       // Transmit non-inverted data to the TX/CK pin-
+    SPBRG = 12;
+    
+    // BAUD RATE FORMULAS:
+    // SYNC=0, BRG16=1, BRGH=1 => bd=Fosc/[4(SPBRG+1)]
+    // 9600 = 500k/[4(X+1)] => SPBRG = 12
     
     APFCON0bits.RXDTSEL = 1;    // RX/DT function is on RC5
     APFCON0bits.TXCKSEL = 1;    // TX/CK function is on RC4
