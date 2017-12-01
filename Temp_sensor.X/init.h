@@ -5,8 +5,36 @@
  * Created on November 29, 2017, 3:11 PM
  */
 
+#include <xc.h>
+#include <stdlib.h>
+
 #ifndef INIT_H
 #define	INIT_H
+
+void init_GPIO(void) {
+    
+    CPSCON0bits.CPSON = 0;   // CPS module is disabled
+    
+    TRISBbits.TRISB4 = 0;   // Configurated as an output
+    TRISBbits.TRISB5 = 0;   // Configurated as an output
+    TRISBbits.TRISB6 = 0;   // Configurated as an output
+    TRISBbits.TRISB7 = 0;   // Configurated as an output
+    
+    ANSELBbits.ANSB4 = 0;   // Digital I/O
+    ANSELBbits.ANSB5 = 0;   // Digital I/O
+    
+    TRISAbits.TRISA5 = 0;
+    TRISAbits.TRISA4 = 0;
+    
+    ANSELAbits.ANSA4 = 0;   // Digital I/O
+
+
+    
+            
+    //APFCON1bits.P1CSEL = 1;     // P1C function on RC1
+    //APFCON1bits.CCP2SEL = 1;    // CCP2/P2A function is on RA5
+
+}
 
 void init_OSC(void) {
     OSCCONbits.IRCF = 7;    // 500kHz MF selected
@@ -23,7 +51,7 @@ void init_OSC(void) {
 
 void init_interrupt(void){
     // General Interruption configuration
-    INTCONbits.GIE = 1;        // Enables all active interrupts
+    INTCONbits.GIE = 0;        // Enables all active interrupts
     INTCONbits.PEIE = 1;       // Enables all active peripheral interrupts 
     
     // timer2 Interruption configuration
@@ -44,8 +72,8 @@ void init_UART(void)
     BAUDCONbits.BRG16 = 1;      // 16-bits Baud Rate Generator is used
     BAUDCONbits.SCKP = 0;       // Transmit non-inverted data to the TX/CK pin-
     
-    APFCON0bits.RXDTSEL = 0;    // RX/DT function is on RB5
-    APFCON0bits.TXCKSEL = 0;    // TX/CK function is on RB7
+    APFCON0bits.RXDTSEL = 1;    // RX/DT function is on RC5
+    APFCON0bits.TXCKSEL = 1;    // TX/CK function is on RC4
 
     
     /*TRISA4 = 0; // configured as output
@@ -80,6 +108,7 @@ void init(void){
     init_OSC();
     init_UART();
     init_interrupt();
+    init_GPIO();
 }
 
 #endif	/* INIT_H */

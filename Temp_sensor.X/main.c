@@ -5,17 +5,35 @@
  * Created on November 28, 2017, 10:22 PM
  */
 
+#define LED_RED     PORTBbits.RB4
+#define LED_ORANGE  PORTBbits.RB5
+#define LED_GREEN   PORTBbits.RB6
+#define LED_BLUE    PORTBbits.RB7
+#define LED_YELLOW  PORTAbits.RA5
+
 
 #include <xc.h>
 #include "constants.h"
 #include "init.h"
 
+int counter = 0;
+
 
 void main(void) {
     
     init();
+    
+    LED_RED = 0;
+    LED_ORANGE = 1;
+    LED_GREEN = 0;
+    LED_BLUE = 1;
+    LED_YELLOW = 0;
+
 
     while(1) {
+        //PORTCbits.RC3 = 0;
+        //PORTCbits.RC6 = 1;
+        //PORTCbits.RC7 = 0;
         NOP();
     }
     
@@ -36,7 +54,23 @@ void interrupt led_blinking(void) {
     // 100 Hz interrupt
     if(TMR2IF == 1) {
         TMR2IF = 0;
-        TXREG = 0x31;
+        
+        counter++;
+        if(counter >=  10000){
+            counter = 0;
+            if(RC7) {
+                RC7 = 0;
+            } else {
+                RC7 = 0;
+            }
+            TXREG = 0x31;
+        }
+        
+
+        //PORTC = 0xFF;
+        //RC7 = 1;
+        //RC6 = 1;
+        //RC3 = 1;
         // LED blinking
     }
 }
