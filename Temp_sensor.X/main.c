@@ -40,11 +40,11 @@ void interrupt led_blinking(void) {
     // 100 Hz interrupt
     if(TMR2IF == 1) {
         TMR2IF = 0;
-        LED_RED = !LED_RED;
+        LED_RED ? LED_RED = 0: LED_RED = 1;
         counter++;
         if(counter >=  100){
             counter = 0;
-            LED_GREEN = !LED_GREEN;
+            LED_GREEN ? LED_GREEN = 0: LED_GREEN = 1;
             TXREG = 0x31;
         }
     }
