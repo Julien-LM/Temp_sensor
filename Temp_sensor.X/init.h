@@ -45,7 +45,15 @@ void init_timer2(void) {
 }
 
 void init_timer1(void) {
-    NOP();
+    T1CONbits.TMR1ON = 1;       // Enable timer1
+    T1CONbits.T1CKPS = 3;       // 1:8 Prescale value
+    T1CONbits.TMR1CS = 2;       // Timer1 clock source is Crystal oscillator
+    T1CONbits.T1OSCEN = 1;      // Dedicated Timer1 oscillator circuit enable
+    T1CONbits.nT1SYNC = 1;      // Do not synchronize external clock input
+    
+    T1GCONbits.TMR1GE = 0;      // Timer 1 counts regardless of Timer1 gate fct
+    
+    
 }
 
 void init_interrupt(void) {
@@ -55,6 +63,7 @@ void init_interrupt(void) {
     
     // timer2 Interruption configuration
     PIE1bits.TMR2IE = 1;     // Enables the Timer2 to PR2 match interrupt
+    PIE1bits.TMR1IE = 1;     // Enable the Timer1 Gate Acquisition interrupt
 }
 
 void init_UART(void) {
@@ -82,7 +91,7 @@ void init_UART(void) {
 void init(void){
     init_OSC();
     init_timer2();
-    //init_timer1();
+    init_timer1();
     init_UART();
     init_interrupt();
     init_GPIO();
