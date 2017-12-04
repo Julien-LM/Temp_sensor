@@ -1,6 +1,7 @@
 /*
  * File:   main.c
- * Author: julien LM
+ * Author: Julien LE MELLEC
+ * Mail: julien.lemellec@gmail.com
  *
  * Created on November 28, 2017, 10:22 PM
  */
@@ -9,8 +10,6 @@
 #define LED_ORANGE  PORTBbits.RB5
 #define LED_GREEN   PORTBbits.RB6
 #define LED_BLUE    PORTBbits.RB7
-#define LED_YELLOW  PORTAbits.RA5
-
 
 #include <xc.h>
 #include "constants.h"
@@ -27,27 +26,12 @@ void main(void) {
     LED_ORANGE = 0;
     LED_GREEN = 0;
     LED_BLUE = 0;
-    LED_YELLOW = 0;
-    
-    while (!TRMT);
-    TXREG = 0x31;
-
-
 
     while(1) {
 
         NOP();
     }
-    
-    /*
-     TODO: 
-     *  - timer configuration
-     *  - Blink led every second
-     *  - Define pinout
-     *  - UART configuration
-     *  - Send a code every seconds
-     *  
-     */
+
     return;
 }
 
@@ -63,12 +47,5 @@ void interrupt led_blinking(void) {
             LED_GREEN = !LED_GREEN;
             TXREG = 0x31;
         }
-        
-
-        //PORTC = 0xFF;
-        //RC7 = 1;
-        //RC6 = 1;
-        //RC3 = 1;
-        // LED blinking
     }
 }
