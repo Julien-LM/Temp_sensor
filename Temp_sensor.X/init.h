@@ -1,6 +1,7 @@
 /* 
  * File:   init.h
- * Author: ju
+ * Author: Julien LE MELLEC
+ * Mail: julien.lemellec@gmail.com
  *
  * Created on November 29, 2017, 3:11 PM
  */

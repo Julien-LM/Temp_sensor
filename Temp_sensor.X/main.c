@@ -1,6 +1,6 @@
 /*
  * File:   main.c
- * Author: ju
+ * Author: julien LM
  *
  * Created on November 28, 2017, 10:22 PM
  */
