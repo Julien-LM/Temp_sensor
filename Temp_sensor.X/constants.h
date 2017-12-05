@@ -12,22 +12,52 @@
 #define RECEPTION_BUFFER_SIZE   20
 
 // ASCII definition
-#define END_OF_TRANSMIT         0x04
-#define ACKNOWLEDGE             0x06
+#define END_OF_TRANSMIT         0x34
+#define START_OF_TEXT           0x32
+#define ACKNOWLEDGE             0x36
 #define LINE_FEED               0x0A
 #define CARRIAGE_RETURN         0x0D
-#define NEG_ACKNOWLEDGE         0x15
+#define NEG_ACKNOWLEDGE         0x35
+#define BACKSPACE               0x08
 
 // Errors codes
-#define WRONG_ARGUMENTS         0x01
-#define UNKNOWN_COMMAND         0x02
-#define BUFFER_OVERFLOW         0x03
+#define WRONG_ARGUMENTS         0x41
+#define UNKNOWN_COMMAND         0x42
+#define BUFFER_OVERFLOW         0x43
+#define DEVICE_BUSY             0x44
+#define FRAMING_ERROR           0x45
+#define OVERRUN_ERROR           0x46
 
+// Communication Protocol
+#define GET_TEMP                0x31
+#define GET_TIME                0x10
+#define SET_TIME                0x11
+#define CONFIGURE_SENSOR        0x20
+#define CLEAN_DATA              0x21
+#define GET_DATA_NUMBER         0x22
+
+// Commands args size
+#define GET_TEMP_SIZE            0x00
+#define GET_TIME_SIZE            0x00
+#define SET_TIME_SIZE            0x06
+#define CONFIGURE_SENSOR_SIZE    0x02
+#define CLEAN_DATA_SIZE          0x00
+#define GET_DATA_NUMBER_SIZE     0x00
 
 #define LED_RED     PORTBbits.RB4
 #define LED_ORANGE  PORTBbits.RB5
 #define LED_GREEN   PORTBbits.RB6
 #define LED_BLUE    PORTBbits.RB7
+
+typedef struct Time_struct Time;
+struct Time_struct {
+    unsigned short years;
+    unsigned char months;
+    unsigned char days;
+    unsigned char hours;
+    unsigned char minutes;
+    unsigned char seconds;
+};
 
 // PIC16F1829 Configuration Bit Settings
 

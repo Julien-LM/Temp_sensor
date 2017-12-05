@@ -6,6 +6,8 @@
                    projectFiles="true">
       <itemPath>constants.h</itemPath>
       <itemPath>init.h</itemPath>
+      <itemPath>UART.h</itemPath>
+      <itemPath>time.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

@@ -10,37 +10,35 @@
 #include <stdio.h>
 #include "constants.h"
 #include "init.h"
+#include "UART.h"
+#include "time.h"
 
 unsigned char counter = 0;
 
-// Time values
-unsigned short years = 0;
-unsigned char months = 0;
-unsigned char days = 0;
-unsigned char hours = 0;
-unsigned char minutes = 0;
-unsigned char seconds = 0;
+// Time structure declaration
+Time time;
 
 // UART reception
-char read_data;
-char reception_buffer[RECEPTION_BUFFER_SIZE] = {0};
-char reception_index = 0;
+unsigned char reception_buffer[RECEPTION_BUFFER_SIZE] = {0};
+unsigned char reception_index = 0;
+unsigned char parsing_in_progress = 0;
 
 // Errors
-char UART_reception_overflow = 0;
+unsigned char UART_reception_overflow = 0;
 
+// Temperature sensor
+char temp = 20;
+unsigned char temp_real = 0;
 
-void icremente_time(void);
-void send_UART_char(unsigned char data);
-void send_UART_char_tab(unsigned char data[], unsigned char data_size);
-void send_UART_int(unsigned int data);
-void return_UART_answer(char command, char data[]);
-void return_UART_error(char command, char error_code);
+void get_temp(void);
+void parsing_done(void);
+void check_errors(void);
+void check_UART_errors(void);
+
 
 void main(void) {
     
-    char received_command = 0;
-    
+    char received_command = 0;    
     init();
     
     LED_RED = 0;
@@ -49,8 +47,40 @@ void main(void) {
     LED_BLUE = 0;
 
     while(1) {
-        if(reception_buffer[reception_index] == END_OF_TRANSMIT) {
+        
+        check_errors();
+        
+        if(UART_reception_overflow) {
+            if(reception_buffer[reception_index] == START_OF_TEXT) {
+                UART_reception_overflow = 0;
+            }
+        } else if(reception_buffer[reception_index - 1] == END_OF_TRANSMIT) {
+            parsing_in_progress = 1;
             received_command = reception_buffer[0];
+            if(received_command == GET_TEMP) {
+                if(reception_index != GET_TEMP_SIZE + 2) {
+                    return_UART_error(reception_buffer[0], WRONG_ARGUMENTS);
+                } else {
+                    get_temp();
+                }
+            } else if(received_command == GET_TIME) {
+                NOP();
+            } else if(received_command == SET_TIME) {
+                if(reception_index != SET_TIME_SIZE + 2) {
+                    return_UART_error(reception_buffer[0], WRONG_ARGUMENTS);
+                } else {
+                    set_time(time, reception_buffer);
+                }
+            } else if(received_command == CONFIGURE_SENSOR) {
+                NOP();
+            } else if(received_command == CLEAN_DATA) {
+                NOP();
+            } else if(received_command == GET_DATA_NUMBER) {
+                NOP();
+            } else {
+                return_UART_error(reception_buffer[0], UNKNOWN_COMMAND);
+            }
+            parsing_done();
             
         }
     }
@@ -59,6 +89,9 @@ void main(void) {
 }
 
 void __interrupt led_blinking(void) {
+    
+    char received_data;
+    
     // Timer2 interrupt flag
     // 100 Hz interrupt
     if(PIR1bits.TMR2IF) {
@@ -68,7 +101,19 @@ void __interrupt led_blinking(void) {
         if(counter >=  100){
             counter = 0;
             LED_GREEN ? LED_GREEN = 0: LED_GREEN = 1;
-            //send_UART_char_tab("lig", sizeof("lig"));
+            if(UART_reception_overflow) {
+                LED_RED = 1;
+            } else {
+                LED_RED = 0;
+            }
+            if(RCSTAbits.OERR == 1) {
+                LED_ORANGE = 1;
+                RCSTAbits.CREN = 0;
+                RCSTAbits.CREN = 1;
+            } else {
+                LED_ORANGE = 0;
+            }
+            //send_UART_char_tab("LIBK", sizeof("UART"));
             //send_UART_int(9676);
         }
     }
@@ -77,80 +122,51 @@ void __interrupt led_blinking(void) {
         TMR1IF = 0;
         TMR1H = 0xF0;
         LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
-        //send_char_UART(0x37);
-        icremente_time();
+        icremente_time(time);
     }
     if(PIR1bits.RCIF) {
-       LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
-       reception_buffer[reception_index] = RCREG;
-       reception_index++;
-       if(reception_index == RECEPTION_BUFFER_SIZE) {
-           reception_index = 0;
-           UART_reception_overflow = 1;
-       }
-    }
-}
-
-void icremente_time(void) {
-    seconds++;
-    if(seconds == 60) {
-        seconds = 0;
-        minutes++;
-        if(minutes == 60) {
-            minutes = 0;
-            hours++;
-            if(hours == 24) {
-                hours = 0;
-                days++;
-                if(months == 2 && days == 29) {
-                    days = 0;
-                    months++;
-                } else if(months == 4 || months == 6 || months == 9 || months == 11) {
-                    if(days == 31) {
-                        days = 0;
-                        months++;
-                    }
-                } else {
-                    if(days == 32) {
-                        days = 0;
-                        months++;
-                        if(months == 13) {
-                            years++;
-                        }
-                    }
-                }
+        received_data = RCREG;
+        if(parsing_in_progress) {
+           return_UART_error(received_data, DEVICE_BUSY);
+        } else {
+            //LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
+            reception_buffer[reception_index] = received_data;
+            // Stop incrementing in overflow
+            if(!UART_reception_overflow) {
+                reception_index++;
             }
+            if(reception_index == RECEPTION_BUFFER_SIZE) {
+               UART_reception_overflow = 1;
+               reception_index = 0;
+               return_UART_error(reception_buffer[0], BUFFER_OVERFLOW);
+           }
         }
     }
 }
 
-void send_UART_char(char data) {
-    while(!TXSTAbits.TRMT);
-    TXREG = data;
+void get_temp(void) {
+    unsigned char tab[2];
+    tab[0] = temp;
+    tab[1] = temp_real;
+    return_UART_answer(GET_TEMP, tab, 2);
 }
 
+void parsing_done(void) {
+    reception_index = 0;
+    parsing_in_progress = 0;   
+}
 
-void send_UART_char_tab(char data[], char data_size) {
-    unsigned int i=0;
-
-    for(i=0; i<data_size; i++) {
-        send_UART_char(data[i]);
+void check_errors(void){
+    check_UART_errors();
+}
+void check_UART_errors(void){
+    if(RCSTAbits.OERR == 1) {
+        return_UART_error(reception_buffer[reception_index], OVERRUN_ERROR);
+        RCSTAbits.CREN = 0;
+        RCSTAbits.CREN = 1;
     }
-    send_UART_char(LINE_FEED);
-    send_UART_char(CARRIAGE_RETURN);
-}
-
-void send_UART_int(unsigned int data) {
-    unsigned char output_sprintf[5] = {0};
-
-    sprintf(output_sprintf, "%u", data);
-    send_UART_char_tab(output_sprintf, sizeof(output_sprintf));
-}
-
-void return_UART_answer(char command, char data[]) {
-    NOP();
-}
-
-void return_UART_error(char command, char error_code) {
-    NOP();
+    if(RCSTAbits.FERR == 1) {
+        return_UART_error(reception_buffer[reception_index], FRAMING_ERROR);
+    }
+    
 }

@@ -6,11 +6,11 @@
  * Created on November 29, 2017, 3:11 PM
  */
 
-#include <xc.h>
-#include <stdlib.h>
-
 #ifndef INIT_H
 #define	INIT_H
+
+#include <xc.h>
+#include <stdlib.h>
 
 void init_GPIO(void) {
     
