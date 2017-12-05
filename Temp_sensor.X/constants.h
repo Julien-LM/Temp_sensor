@@ -9,6 +9,25 @@
 #ifndef CONSTANTS_H
 #define	CONSTANTS_H
 
+#define RECEPTION_BUFFER_SIZE   20
+
+// ASCII definition
+#define END_OF_TRANSMIT         0x04
+#define ACKNOWLEDGE             0x06
+#define LINE_FEED               0x0A
+#define CARRIAGE_RETURN         0x0D
+#define NEG_ACKNOWLEDGE         0x15
+
+// Errors codes
+#define WRONG_ARGUMENTS         0x01
+#define UNKNOWN_COMMAND         0x02
+#define BUFFER_OVERFLOW         0x03
+
+
+#define LED_RED     PORTBbits.RB4
+#define LED_ORANGE  PORTBbits.RB5
+#define LED_GREEN   PORTBbits.RB6
+#define LED_BLUE    PORTBbits.RB7
 
 // PIC16F1829 Configuration Bit Settings
 

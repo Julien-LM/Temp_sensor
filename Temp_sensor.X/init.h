@@ -64,6 +64,9 @@ void init_interrupt(void) {
     // timer2 Interruption configuration
     PIE1bits.TMR2IE = 1;     // Enables the Timer2 to PR2 match interrupt
     PIE1bits.TMR1IE = 1;     // Enable the Timer1 Gate Acquisition interrupt
+    
+    // USART Receive Interrupt Enable bit
+    PIE1bits.RCIE = 1;      // Eables the USART receive interrupt
 }
 
 void init_UART(void) {
