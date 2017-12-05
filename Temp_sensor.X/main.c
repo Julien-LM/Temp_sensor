@@ -75,11 +75,17 @@ void main(void) {
                     set_time(&time, reception_buffer);
                 }
             } else if(received_command == CONFIGURE_SENSOR) {
-                NOP();
+                if(check_arg_size(CONFIGURE_SENSOR_SIZE)) {
+                    configure_sensor();
+                }
             } else if(received_command == CLEAN_DATA) {
-                NOP();
+                if(check_arg_size(CLEAN_DATA_SIZE)) {
+                    clean_data();
+                }
             } else if(received_command == GET_DATA_NUMBER) {
-                NOP();
+                if(check_arg_size(GET_DATA_NUMBER_SIZE)) {
+                    get_data_number();
+                }
             } else {
                 return_UART_error(reception_buffer[0], UNKNOWN_COMMAND);
             }
@@ -164,4 +170,16 @@ char check_arg_size(char arg_size) {
         return 0;
     } 
     return 1;
+}
+
+void configure_sensor(void) {
+    NOP();
+}
+
+void clean_data(void) {
+    NOP();
+}
+
+void get_data_number(void) {
+    NOP();
 }

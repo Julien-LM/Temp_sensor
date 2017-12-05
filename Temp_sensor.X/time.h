@@ -10,9 +10,6 @@
 #define	TIME_H
 
 void icremente_time(Time* time) {
-    if((*time).seconds == 0) {
-        LED_ORANGE = 1;
-    }
     (*time).seconds++;
     if((*time).seconds == 60) {
         (*time).seconds = 0;
