@@ -30,8 +30,8 @@
 
 // Communication Protocol
 #define GET_TEMP                0x31
-#define GET_TIME                0x10
-#define SET_TIME                0x11
+#define GET_TIME                0x38
+#define SET_TIME                0x39
 #define CONFIGURE_SENSOR        0x20
 #define CLEAN_DATA              0x21
 #define GET_DATA_NUMBER         0x22

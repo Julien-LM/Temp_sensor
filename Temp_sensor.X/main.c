@@ -31,9 +31,13 @@ char temp = 20;
 unsigned char temp_real = 0;
 
 void get_temp(void);
+void configure_sensor(void);
+void clean_data(void);
+void get_data_number(void);
 void parsing_done(void);
 void check_errors(void);
 void check_UART_errors(void);
+char check_arg_size(char arg_size);
 
 
 void main(void) {
@@ -57,19 +61,18 @@ void main(void) {
         } else if(reception_buffer[reception_index - 1] == END_OF_TRANSMIT) {
             parsing_in_progress = 1;
             received_command = reception_buffer[0];
+            
             if(received_command == GET_TEMP) {
-                if(reception_index != GET_TEMP_SIZE + 2) {
-                    return_UART_error(reception_buffer[0], WRONG_ARGUMENTS);
-                } else {
+                if(check_arg_size(GET_TEMP_SIZE)) {
                     get_temp();
                 }
             } else if(received_command == GET_TIME) {
-                NOP();
+                if(check_arg_size(GET_TIME_SIZE)) {
+                    get_time(time);
+                }
             } else if(received_command == SET_TIME) {
-                if(reception_index != SET_TIME_SIZE + 2) {
-                    return_UART_error(reception_buffer[0], WRONG_ARGUMENTS);
-                } else {
-                    set_time(time, reception_buffer);
+                if(check_arg_size(SET_TIME_SIZE)) {
+                    set_time(&time, reception_buffer);
                 }
             } else if(received_command == CONFIGURE_SENSOR) {
                 NOP();
@@ -96,25 +99,10 @@ void __interrupt led_blinking(void) {
     // 100 Hz interrupt
     if(PIR1bits.TMR2IF) {
         TMR2IF = 0;
-        //LED_RED ? LED_RED = 0: LED_RED = 1;
         counter++;
         if(counter >=  100){
             counter = 0;
             LED_GREEN ? LED_GREEN = 0: LED_GREEN = 1;
-            if(UART_reception_overflow) {
-                LED_RED = 1;
-            } else {
-                LED_RED = 0;
-            }
-            if(RCSTAbits.OERR == 1) {
-                LED_ORANGE = 1;
-                RCSTAbits.CREN = 0;
-                RCSTAbits.CREN = 1;
-            } else {
-                LED_ORANGE = 0;
-            }
-            //send_UART_char_tab("LIBK", sizeof("UART"));
-            //send_UART_int(9676);
         }
     }
     // Timer1 interrupt flag, every second
@@ -122,7 +110,7 @@ void __interrupt led_blinking(void) {
         TMR1IF = 0;
         TMR1H = 0xF0;
         LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
-        icremente_time(time);
+        icremente_time(&time);
     }
     if(PIR1bits.RCIF) {
         received_data = RCREG;
@@ -168,5 +156,12 @@ void check_UART_errors(void){
     if(RCSTAbits.FERR == 1) {
         return_UART_error(reception_buffer[reception_index], FRAMING_ERROR);
     }
-    
+}
+
+char check_arg_size(char arg_size) {
+    if(reception_index != arg_size + 2) {
+        return_UART_error(reception_buffer[0], WRONG_ARGUMENTS);
+        return 0;
+    } 
+    return 1;
 }
