@@ -12,12 +12,12 @@
 #define RECEPTION_BUFFER_SIZE   20
 
 // ASCII definition
-#define END_OF_TRANSMIT         0x34
-#define START_OF_TEXT           0x32
-#define ACKNOWLEDGE             0x36
+#define END_OF_TRANSMIT         0x04
+#define START_OF_TEXT           0x02
+#define ACKNOWLEDGE             0x06
 #define LINE_FEED               0x0A
 #define CARRIAGE_RETURN         0x0D
-#define NEG_ACKNOWLEDGE         0x35
+#define NEG_ACKNOWLEDGE         0x15
 #define BACKSPACE               0x08
 
 // Errors codes
@@ -29,12 +29,12 @@
 #define OVERRUN_ERROR           0x46
 
 // Communication Protocol
-#define GET_TEMP                0x31
-#define GET_TIME                0x38
-#define SET_TIME                0x39
-#define CONFIGURE_SENSOR        0x20
-#define CLEAN_DATA              0x21
-#define GET_DATA_NUMBER         0x22
+#define GET_TEMP                0x20
+#define GET_TIME                0x21
+#define SET_TIME                0x22
+#define CONFIGURE_SENSOR        0x30
+#define CLEAN_DATA              0x31
+#define GET_DATA_NUMBER         0x32
 
 // Commands args size
 #define GET_TEMP_SIZE            0x00
