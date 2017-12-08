@@ -9,7 +9,7 @@
 #ifndef UART_H
 #define	UART_H
 
-void line_return(void);
+void end_of_transmit(void);
 
 void send_UART_char(char data) {
     while(!TXSTAbits.TRMT);
@@ -37,19 +37,17 @@ void return_UART_answer(char command, char data[], char data_size) {
     send_UART_char(ACKNOWLEDGE);
     send_UART_char(command);
     send_UART_char_tab(data, data_size);
-    send_UART_char(END_OF_TRANSMIT);
-    line_return();
+    end_of_transmit();
     }
 
 void return_UART_error(char command, char error_code) {
     send_UART_char(NEG_ACKNOWLEDGE);
     send_UART_char(command);
     send_UART_char(error_code);
-    send_UART_char(END_OF_TRANSMIT);
-    line_return();
+    end_of_transmit();
 }
 
-void line_return(void) {
+void end_of_transmit(void) {
     send_UART_char(LINE_FEED);
     send_UART_char(CARRIAGE_RETURN);
 }

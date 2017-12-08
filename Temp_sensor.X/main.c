@@ -34,6 +34,7 @@ void get_temp(void);
 void configure_sensor(void);
 void clean_data(void);
 void get_data_number(void);
+void ping(void);
 void parsing_done(void);
 void check_errors(void);
 void check_UART_errors(void);
@@ -58,7 +59,7 @@ void main(void) {
             if(reception_buffer[reception_index] == START_OF_TEXT) {
                 UART_reception_overflow = 0;
             }
-        } else if(reception_buffer[reception_index - 1] == END_OF_TRANSMIT) {
+        } else if(reception_buffer[reception_index - 1] == LINE_FEED) {
             parsing_in_progress = 1;
             received_command = reception_buffer[0];
             
@@ -85,6 +86,10 @@ void main(void) {
             } else if(received_command == GET_DATA_NUMBER) {
                 if(check_arg_size(GET_DATA_NUMBER_SIZE)) {
                     get_data_number();
+                }
+            } else if(received_command == PING) {
+                if(check_arg_size(PING_NUMBER_SIZE)) {
+                    ping();
                 }
             } else {
                 return_UART_error(reception_buffer[0], UNKNOWN_COMMAND);
@@ -182,4 +187,10 @@ void clean_data(void) {
 
 void get_data_number(void) {
     NOP();
+}
+
+void ping(void) {
+    unsigned char tab[1];
+    tab[0] = PING;
+    return_UART_answer(PING, tab, 1);
 }

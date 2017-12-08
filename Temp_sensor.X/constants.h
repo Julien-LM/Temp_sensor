@@ -35,14 +35,16 @@
 #define CONFIGURE_SENSOR        0x30
 #define CLEAN_DATA              0x31
 #define GET_DATA_NUMBER         0x32
+#define PING                    0x33
 
 // Commands args size
-#define GET_TEMP_SIZE            0x00
-#define GET_TIME_SIZE            0x00
-#define SET_TIME_SIZE            0x06
-#define CONFIGURE_SENSOR_SIZE    0x02
-#define CLEAN_DATA_SIZE          0x00
-#define GET_DATA_NUMBER_SIZE     0x00
+#define GET_TEMP_SIZE           0x00
+#define GET_TIME_SIZE           0x00
+#define SET_TIME_SIZE           0x06
+#define CONFIGURE_SENSOR_SIZE   0x02
+#define CLEAN_DATA_SIZE         0x00
+#define GET_DATA_NUMBER_SIZE    0x00
+#define PING_NUMBER_SIZE        0x00
 
 #define LED_RED     PORTBbits.RB4
 #define LED_ORANGE  PORTBbits.RB5
