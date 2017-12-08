@@ -49,7 +49,6 @@ void return_UART_error(char command, char error_code) {
 
 void end_of_transmit(void) {
     send_UART_char(LINE_FEED);
-    send_UART_char(CARRIAGE_RETURN);
 }
 
 #endif	/* UART_H */
