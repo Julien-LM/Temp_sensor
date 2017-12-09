@@ -53,7 +53,8 @@
 
 typedef struct Time_struct Time;
 struct Time_struct {
-    unsigned short years;
+    unsigned char century;
+    unsigned char years;
     unsigned char months;
     unsigned char days;
     unsigned char hours;
