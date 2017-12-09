@@ -40,7 +40,7 @@
 // Commands args size
 #define GET_TEMP_SIZE           0x00
 #define GET_TIME_SIZE           0x00
-#define SET_TIME_SIZE           0x06
+#define SET_TIME_SIZE           0x07
 #define CONFIGURE_SENSOR_SIZE   0x02
 #define CLEAN_DATA_SIZE         0x00
 #define GET_DATA_NUMBER_SIZE    0x00

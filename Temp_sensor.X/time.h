@@ -44,23 +44,24 @@ void icremente_time(Time* time) {
 
 void set_time(Time* time, char reception_buffer[]) {
     (*time).years = reception_buffer[1];
-    (*time).months = reception_buffer[2];
-    (*time).days = reception_buffer[3];
-    (*time).hours = reception_buffer[4];
-    (*time).minutes = reception_buffer[5];
-    (*time).seconds = reception_buffer[6];
+    (*time).months = reception_buffer[3];
+    (*time).days = reception_buffer[4];
+    (*time).hours = reception_buffer[5];
+    (*time).minutes = reception_buffer[6];
+    (*time).seconds = reception_buffer[7];
     return_UART_answer(SET_TIME, 0, 0);
 }
 
 void get_time(Time time) {
-    unsigned char tab[6];
+    unsigned char tab[7];
     tab[0] = time.years;
-    tab[1] = time.months;
-    tab[2] = time.days;
-    tab[3] = time.hours;
-    tab[4] = time.minutes;
-    tab[5] = time.seconds;
-    return_UART_answer(GET_TIME, tab, 6);
+    tab[1] = time.years;
+    tab[2] = time.months;
+    tab[3] = time.days;
+    tab[4] = time.hours;
+    tab[5] = time.minutes;
+    tab[6] = time.seconds;
+    return_UART_answer(GET_TIME, tab, 7);
 }
 
 #endif	/* TIME_H */
