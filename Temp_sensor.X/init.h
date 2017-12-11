@@ -16,32 +16,31 @@ void init_GPIO(void) {
     
     CPSCON0bits.CPSON = 0;   // CPS module is disabled
     
-    TRISBbits.TRISB4 = 0;   // Configurated as an output
-    TRISBbits.TRISB5 = 0;   // Configurated as an output
-    TRISBbits.TRISB6 = 0;   // Configurated as an output
-    TRISBbits.TRISB7 = 0;   // Configurated as an output
+    TRISCbits.TRISC0 = 0;   // Configurated as an output
+    TRISCbits.TRISC1 = 0;   // Configurated as an output
+    TRISCbits.TRISC2 = 0;   // Configurated as an output
+    TRISCbits.TRISC3 = 0;   // Configurated as an output
     
-    ANSELBbits.ANSB4 = 0;   // Digital I/O
-    ANSELBbits.ANSB5 = 0;   // Digital I/O
-    
-    TRISAbits.TRISA5 = 0;
-    TRISAbits.TRISA4 = 0;
-    
-    ANSELAbits.ANSA4 = 0;   // Digital I/O
+    ANSELCbits.ANSC0 = 0;   // Digital I/O
+    ANSELCbits.ANSC1 = 0;   // Digital I/O
+    ANSELCbits.ANSC2 = 0;   // Digital I/O
+    ANSELCbits.ANSC3 = 0;   // Digital I/O
 }
 
 void init_OSC(void) {
-    OSCCONbits.IRCF = 7;    // 500kHz MF selected
-    OSCCONbits.SCS = 2;     // Internal oscillator block
+    OSCCONbits.IRCF = 0b1101;   // 4MHz HF selected
+    OSCCONbits.SCS = 2;         // Internal oscillator block
     // XTAL = 500KHz, efficient 125kHz
 }
 
 void init_timer2(void) {
-    PR2 = 0xFA;
+    // Fosc = 4MHz
+    // Fcy = 1MHz
+    PR2 = 0x7D;             // value set to 125
     T2CONbits.TMR2ON = 1;   //Timer2 is on
-    T2CONbits.T2CKPS = 0;   // Prescaler is 1
+    T2CONbits.T2CKPS = 2;   // Prescaler is 16
     T2CONbits.T2OUTPS = 4;  // 1:5 Postscaler*/
-    // 100Hz interrupt with 500KHz FOSC
+    // 100Hz interrupt
 }
 
 void init_timer1(void) {
@@ -79,7 +78,7 @@ void init_UART(void) {
     RCSTAbits.RX9 = 0;          // Selected 8-bits reception
     RCSTAbits.CREN = 1;         // Continuous Receive Enable bit
 
-    BAUDCONbits.BRG16 = 1;      // 16-bits Baud Rate Generator is used
+    BAUDCONbits.BRG16 = 0;      // 8-bits Baud Rate Generator is used
     BAUDCONbits.SCKP = 0;       // Transmit non-inverted data to the TX/CK pin-
     SPBRG = 12;
     
@@ -87,8 +86,26 @@ void init_UART(void) {
     // SYNC=0, BRG16=1, BRGH=1 => bd=Fosc/[4(SPBRG+1)]
     // 9600 = 500k/[4(X+1)] => SPBRG = 12
     
-    APFCON0bits.RXDTSEL = 1;    // RX/DT function is on RC5
-    APFCON0bits.TXCKSEL = 1;    // TX/CK function is on RC4
+    ANSELBbits.ANSB5 = 0;   // Digital I/O
+
+    APFCON0bits.RXDTSEL = 0;    // RX/DT function is on RB5
+    APFCON0bits.TXCKSEL = 0;    // TX/CK function is on RB7
+}
+
+void init_MSSP1(void) {
+    // Clock rate BRG
+    SSP1ADD = 0x09;
+    
+    TRISBbits.TRISB4 = 1;   // Set pin to be open-drain
+    TRISBbits.TRISB6 = 1;   // Set pin to be open-drain
+    //ANSELBbits.ANSB4 = 0;
+    
+    SSP1STATbits.SMP = 1;   // Slew rate control disabled for standard speed
+
+    SSP1CON1bits.SSPEN = 1; // Enable the serial port and configure SDA1 & SCL1
+    SSP1CON1bits.SSPM = 8;  // I2C master mode, clock = Fosc/(4*BRG+1)
+    
+    SSP1CON2bits.SEN = 0;   // Start condition Idle
 }
 
 void init(void){
@@ -98,6 +115,7 @@ void init(void){
     init_UART();
     init_interrupt();
     init_GPIO();
+    init_MSSP1();
 }
 
 #endif	/* INIT_H */

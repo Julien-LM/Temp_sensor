@@ -12,6 +12,7 @@
 #include "init.h"
 #include "UART.h"
 #include "time.h"
+#include "i2c.h"
 
 unsigned char counter = 0;
 
@@ -49,9 +50,18 @@ void main(void) {
     LED_RED = 0;
     LED_ORANGE = 0;
     LED_GREEN = 0;
-    LED_BLUE = 0;
+    
+    char temp_tab [2] = {0};
 
     while(1) {
+        
+        configuration_reg();
+        start_convert();
+        while(1) {
+            read_temp(&temp_tab);
+            send_UART_char_tab(temp_tab, 2);
+            __delay_ms(1000);
+        }
         
         check_errors();
         
@@ -113,7 +123,7 @@ void __interrupt led_blinking(void) {
         counter++;
         if(counter >=  100){
             counter = 0;
-            LED_GREEN ? LED_GREEN = 0: LED_GREEN = 1;
+            //LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
         }
     }
     // Timer1 interrupt flag, every second

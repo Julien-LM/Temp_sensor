@@ -46,10 +46,22 @@
 #define GET_DATA_NUMBER_SIZE    0x00
 #define PING_NUMBER_SIZE        0x00
 
-#define LED_RED     PORTBbits.RB4
-#define LED_ORANGE  PORTBbits.RB5
-#define LED_GREEN   PORTBbits.RB6
-#define LED_BLUE    PORTBbits.RB7
+// I2C constants
+#define CONTROL_BYTE_WRITE      0x90
+#define CONTROL_BYTE_READ       0x91
+#define ACK                     0x00
+#define nACK                    0x01
+#define READ_TEMP               0xAA
+#define START_CONVERT           0xEE
+#define STOP_CONVERT            0x22
+#define ACCESS_MEM              0x17
+#define ACCESS_CONFIG           0xAC
+
+#define LED_RED     PORTCbits.RC0
+#define LED_ORANGE  PORTCbits.RC1
+#define LED_GREEN   PORTCbits.RC2
+#define LED_BLUE    PORTCbits.RC3
+
 
 typedef struct Time_struct Time;
 struct Time_struct {
