@@ -28,8 +28,8 @@ unsigned char parsing_in_progress = 0;
 unsigned char UART_reception_overflow = 0;
 
 // Temperature sensor
-char temp = 20;
-unsigned char temp_real = 0;
+unsigned char temp_real[2] = {0};
+unsigned short temp_convert_count = 0;
 
 void get_temp(void);
 void configure_sensor(void);
@@ -50,19 +50,10 @@ void main(void) {
     LED_RED = 0;
     LED_ORANGE = 0;
     LED_GREEN = 0;
-    
-    char temp_tab [2] = {0};
+    LED_BLUE = 0;
 
     while(1) {
-        
-        configuration_reg();
-        start_convert();
-        while(1) {
-            read_temp(&temp_tab);
-            send_UART_char_tab(temp_tab, 2);
-            __delay_ms(1000);
-        }
-        
+               
         check_errors();
         
         if(UART_reception_overflow) {
@@ -127,12 +118,21 @@ void __interrupt led_blinking(void) {
         }
     }
     // Timer1 interrupt flag, every second
+    // Timer triggered by quartz
     if(PIR1bits.TMR1IF) {
         TMR1IF = 0;
         TMR1H = 0xF0;
         LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
         icremente_time(&time);
+        // Temperature sensor conversion
+        temp_convert_count++;
+        if(temp_convert_count == 5) {
+            temp_convert_count = 0;
+            read_temp(temp_real);
+            start_convert();
+        }
     }
+    
     if(PIR1bits.RCIF) {
         received_data = RCREG;
         if(parsing_in_progress) {
@@ -154,10 +154,7 @@ void __interrupt led_blinking(void) {
 }
 
 void get_temp(void) {
-    unsigned char tab[2];
-    tab[0] = temp;
-    tab[1] = temp_real;
-    return_UART_answer(GET_TEMP, tab, 2);
+    return_UART_answer(GET_TEMP, temp_real, 2);
 }
 
 void parsing_done(void) {

@@ -11,6 +11,8 @@
 
 #define RECEPTION_BUFFER_SIZE   20
 
+#define _XTAL_FREQ 4000000
+
 // ASCII definition
 #define END_OF_TRANSMIT         0x04
 #define START_OF_TEXT           0x02

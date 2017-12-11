@@ -9,9 +9,6 @@
 #ifndef I2C_H
 #define	I2C_H
 
-#define _XTAL_FREQ 4000000
-
-
 void I2C_Master_Wait()
 {
   while (SSP1STATbits.R_nW || (SSP1CON2 & 0x1F));
@@ -40,7 +37,6 @@ void I2C_Master_Stop()
 {
     SSP1CON2bits.PEN = 1;
     while(SSP1CON2bits.PEN);
-    __delay_ms(50);
 }
 
 void I2C_Master_Ack(void) {
@@ -92,16 +88,17 @@ char start_convert(void) {
     I2C_Master_Write(CONTROL_BYTE_WRITE);   // Write control byte + write
     I2C_Master_Write(START_CONVERT);        // Write start convert command
     I2C_Master_Stop();                      // Stop condition
+    //__delay_ms(200);
     return(0x44);
 }
 
-char configuration_reg(void) {
+void configuration_reg(void) {
     I2C_Master_Start();                     // Start condition
     I2C_Master_Write(CONTROL_BYTE_WRITE);   // Write control byte + write
     I2C_Master_Write(ACCESS_CONFIG);        // Write access config command
-    I2C_Master_Write(0x00);                 // Write config data
+    I2C_Master_Write(0x01);                 // Write config data
     I2C_Master_Stop();                      // Stop condition
-    return(0x56);
+    __delay_ms(50);
 }
 
 #endif	/* I2C_H */

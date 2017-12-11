@@ -12,6 +12,8 @@
 #include <xc.h>
 #include <stdlib.h>
 
+void configuration_reg(void);
+
 void init_GPIO(void) {
     
     CPSCON0bits.CPSON = 0;   // CPS module is disabled
@@ -106,6 +108,9 @@ void init_MSSP1(void) {
     SSP1CON1bits.SSPM = 8;  // I2C master mode, clock = Fosc/(4*BRG+1)
     
     SSP1CON2bits.SEN = 0;   // Start condition Idle
+    
+    configuration_reg();
+
 }
 
 void init(void){

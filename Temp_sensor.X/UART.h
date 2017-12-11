@@ -9,11 +9,14 @@
 #ifndef UART_H
 #define	UART_H
 
-void end_of_transmit(void);
 
 void send_UART_char(char data) {
     while(!TXSTAbits.TRMT);
     TXREG = data;
+}
+
+void end_of_transmit(void) {
+    send_UART_char(LINE_FEED);
 }
 
 void send_UART_char_tab(char data[], char data_size) {
@@ -22,16 +25,14 @@ void send_UART_char_tab(char data[], char data_size) {
     for(i=0; i<data_size; i++) {
         send_UART_char(data[i]);
     }
-    //send_UART_char(LINE_FEED);
-    //send_UART_char(CARRIAGE_RETURN);
 }
 
-void send_UART_int(unsigned int data) {
+/*void send_UART_int(unsigned int data) {
     unsigned char output_sprintf[5] = {0};
 
     sprintf(output_sprintf, "%u", data);
     send_UART_char_tab(output_sprintf, sizeof(output_sprintf));
-}
+}*/
 
 void return_UART_answer(char command, char data[], char data_size) {
     send_UART_char(ACKNOWLEDGE);
@@ -45,10 +46,6 @@ void return_UART_error(char command, char error_code) {
     send_UART_char(command);
     send_UART_char(error_code);
     end_of_transmit();
-}
-
-void end_of_transmit(void) {
-    send_UART_char(LINE_FEED);
 }
 
 #endif	/* UART_H */
