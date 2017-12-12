@@ -16,7 +16,7 @@ void send_UART_char(char data) {
 }
 
 void end_of_transmit(void) {
-    send_UART_char(LINE_FEED);
+    send_UART_char(END_OF_TRANSMIT);
 }
 
 void send_UART_char_tab(char data[], char data_size) {

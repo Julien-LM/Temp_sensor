@@ -60,7 +60,7 @@ void main(void) {
             if(reception_buffer[reception_index] == START_OF_TEXT) {
                 UART_reception_overflow = 0;
             }
-        } else if(reception_buffer[reception_index - 1] == LINE_FEED) {
+        } else if(reception_buffer[reception_index - 1] == END_OF_TRANSMIT) {
             parsing_in_progress = 1;
             received_command = reception_buffer[0];
             
@@ -130,6 +130,7 @@ void __interrupt led_blinking(void) {
             temp_convert_count = 0;
             read_temp(temp_real);
             start_convert();
+            LED_RED = 0;
         }
     }
     
@@ -173,6 +174,7 @@ void check_UART_errors(void){
     }
     if(RCSTAbits.FERR == 1) {
         return_UART_error(reception_buffer[reception_index], FRAMING_ERROR);
+        LED_RED = 1;
     }
 }
 

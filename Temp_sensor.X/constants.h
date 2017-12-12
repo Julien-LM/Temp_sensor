@@ -14,7 +14,7 @@
 #define _XTAL_FREQ 4000000
 
 // ASCII definition
-#define END_OF_TRANSMIT         0x04
+#define END_OF_TRANSMIT         0xF4
 #define START_OF_TEXT           0x02
 #define ACKNOWLEDGE             0x06
 #define LINE_FEED               0x0A
