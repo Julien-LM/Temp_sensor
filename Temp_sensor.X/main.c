@@ -31,6 +31,8 @@ unsigned char UART_reception_overflow = 0;
 unsigned char temp_real[2] = {0};
 unsigned short temp_convert_count = 0;
 
+unsigned short temp_sample_rate = 5;
+
 void get_temp(void);
 void configure_sensor(void);
 void clean_data(void);
@@ -125,11 +127,13 @@ void __interrupt led_blinking(void) {
         LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
         icremente_time(&time);
         // Temperature sensor conversion
+        if(temp_convert_count == temp_sample_rate-1) {
+            start_convert();
+        }
         temp_convert_count++;
-        if(temp_convert_count == 5) {
+        if(temp_convert_count == temp_sample_rate) {
             temp_convert_count = 0;
             read_temp(temp_real);
-            start_convert();
             LED_RED = 0;
         }
     }
@@ -187,7 +191,8 @@ char check_arg_size(char arg_size) {
 }
 
 void configure_sensor(void) {
-    NOP();
+    temp_sample_rate = reception_buffer[1];
+    return_UART_answer(CONFIGURE_SENSOR, 0, 0);
 }
 
 void clean_data(void) {
