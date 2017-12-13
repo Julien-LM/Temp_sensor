@@ -8,6 +8,7 @@
 
 #include <xc.h>
 #include <stdio.h>
+#include <math.h>
 #include "constants.h"
 #include "init.h"
 #include "UART.h"
@@ -31,7 +32,7 @@ unsigned char UART_reception_overflow = 0;
 unsigned char temp_real[2] = {0};
 unsigned short temp_convert_count = 0;
 
-unsigned short temp_sample_rate = 5;
+unsigned int temp_sample_rate = 5;
 
 void get_temp(void);
 void configure_sensor(void);
@@ -191,8 +192,16 @@ char check_arg_size(char arg_size) {
 }
 
 void configure_sensor(void) {
-    temp_sample_rate = reception_buffer[1];
-    return_UART_answer(CONFIGURE_SENSOR, 0, 0);
+    char tab[2] = {0};
+    
+    temp_sample_rate = ((reception_buffer[1] & 0x3F) * 
+            (((((reception_buffer[1] & 0x80) >> 7) * 3599)+1)*
+            ((((reception_buffer[1] & 0x40) >> 6) * 59)+1)));
+     
+    tab[0] = temp_sample_rate & 0x00FF;
+    tab[1] = (temp_sample_rate & 0xFF00) >> 8;
+    
+    return_UART_answer(CONFIGURE_SENSOR, tab, 2);
 }
 
 void clean_data(void) {
