@@ -19,8 +19,8 @@ void end_of_transmit(void) {
     send_UART_char(END_OF_TRANSMIT);
 }
 
-void send_UART_char_tab(char data[], char data_size) {
-    unsigned int i=0;
+void send_UART_char_tab(char data[], unsigned short data_size) {
+    unsigned short i=0;
 
     for(i=0; i<data_size; i++) {
         send_UART_char(data[i]);
@@ -34,7 +34,7 @@ void send_UART_char_tab(char data[], char data_size) {
     send_UART_char_tab(output_sprintf, sizeof(output_sprintf));
 }*/
 
-void return_UART_answer(char command, char data[], char data_size) {
+void return_UART_answer(char command, char data[], unsigned short data_size) {
     send_UART_char(ACKNOWLEDGE);
     send_UART_char(command);
     send_UART_char_tab(data, data_size);

@@ -10,6 +10,7 @@
 #define	CONSTANTS_H
 
 #define RECEPTION_BUFFER_SIZE   20
+#define DATA_STORAGE_SIZE       800
 
 #define _XTAL_FREQ 4000000
 
@@ -38,6 +39,13 @@
 #define CLEAN_DATA              0x31
 #define GET_DATA_NUMBER         0x32
 #define PING                    0x33
+#define GET_REAL_TIME_INFO      0x34
+
+// Temp data transfer protocol
+#define TIME_TRANSFERT_IND      0xFD
+#define S_RATE_TRANSFERT_IND    0xFC
+#define TIME_TRANSFERT_IND_S    0x07
+#define S_RATE_TRANSFERT_IND_S  0x04
 
 // Commands args size
 #define GET_TEMP_SIZE           0x00
@@ -47,6 +55,7 @@
 #define CLEAN_DATA_SIZE         0x00
 #define GET_DATA_NUMBER_SIZE    0x00
 #define PING_NUMBER_SIZE        0x00
+#define GET_REAL_TIME_INFO      0x00
 
 // I2C constants
 #define CONTROL_BYTE_WRITE      0x90

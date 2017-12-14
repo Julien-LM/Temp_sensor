@@ -16,6 +16,7 @@
 #include "i2c.h"
 
 unsigned char counter = 0;
+unsigned short temp_convert_count = 0;
 
 // Time structure declaration
 Time time;
@@ -30,9 +31,14 @@ unsigned char UART_reception_overflow = 0;
 
 // Temperature sensor
 unsigned char temp_real[2] = {0};
-unsigned short temp_convert_count = 0;
+unsigned long temp_sample_rate = 5;
 
-unsigned int temp_sample_rate = 5;
+// Temperature storage
+unsigned char data_storage[DATA_STORAGE_SIZE] = {0};
+unsigned short data_storage_index = 0;
+unsigned char time_info_storage = 0;
+unsigned char sample_rate_info_storage = 0;
+unsigned char data_storage_overflow = 0;
 
 void get_temp(void);
 void configure_sensor(void);
@@ -43,6 +49,10 @@ void parsing_done(void);
 void check_errors(void);
 void check_UART_errors(void);
 char check_arg_size(char arg_size);
+void store_data(void);
+void add_data_char(char data);
+void add_data_long(long data);
+void get_real_time_info(void);
 
 
 void main(void) {
@@ -77,11 +87,14 @@ void main(void) {
                 }
             } else if(received_command == SET_TIME) {
                 if(check_arg_size(SET_TIME_SIZE)) {
+                    time_info_storage = 0;
                     set_time(&time, reception_buffer);
                 }
             } else if(received_command == CONFIGURE_SENSOR) {
                 if(check_arg_size(CONFIGURE_SENSOR_SIZE)) {
+                    sample_rate_info_storage = 0;
                     configure_sensor();
+                    reception_index = 0;
                 }
             } else if(received_command == CLEAN_DATA) {
                 if(check_arg_size(CLEAN_DATA_SIZE)) {
@@ -132,10 +145,11 @@ void __interrupt led_blinking(void) {
             start_convert();
         }
         temp_convert_count++;
+        // Read and store data routine
         if(temp_convert_count == temp_sample_rate) {
             temp_convert_count = 0;
             read_temp(temp_real);
-            LED_RED = 0;
+            store_data();
         }
     }
     
@@ -158,9 +172,56 @@ void __interrupt led_blinking(void) {
         }
     }
 }
+void get_data_number(void) {
+    char tab[2] = {0};
+    tab[0] = data_storage_index & 0x00FF;
+    tab[1] = (data_storage_index & 0xFF00) >> 8;
+    return_UART_answer(GET_DATA_NUMBER, tab, 2);   
+}
+
+void store_data(void) {
+    if(!time_info_storage) {
+        time_info_storage = 1;
+        add_data_char(TIME_TRANSFERT_IND);
+        add_data_char(time.century);
+        add_data_char(time.years);
+        add_data_char(time.months);
+        add_data_char(time.days);
+        add_data_char(time.hours);
+        add_data_char(time.minutes);
+        add_data_char(time.seconds);
+    }
+    if(!sample_rate_info_storage) {
+        sample_rate_info_storage = 1;
+        add_data_char(S_RATE_TRANSFERT_IND);
+        add_data_long(temp_sample_rate);
+    }
+    add_data_char(temp_real[1]);
+    add_data_char(temp_real[0]);
+}
+
+void add_data_char(char data){
+    data_storage[data_storage_index] = data;
+    data_storage_index++;
+    if(data_storage_index == DATA_STORAGE_SIZE) {
+        data_storage_index = 0;
+        data_storage_overflow = 1;
+    }
+}
+
+void add_data_long(long data){
+    add_data_char(data & 0x000000FF);
+    add_data_char((data & 0x0000FF00) >> 8);
+    add_data_char((data & 0x00FF0000) >> 16);
+    add_data_char((data & 0xFF000000) >> 24);
+}
 
 void get_temp(void) {
-    return_UART_answer(GET_TEMP, temp_real, 2);
+    return_UART_answer(GET_TEMP, data_storage, data_storage_index);
+}
+
+void get_real_time_info(void) {
+    return_UART_answer(GET_REAL_TIME_INFO, temp_real, 2);
 }
 
 void parsing_done(void) {
@@ -193,9 +254,8 @@ char check_arg_size(char arg_size) {
 
 void configure_sensor(void) {
     char tab[2] = {0};
-    
     temp_sample_rate = ((reception_buffer[1] & 0x3F) * 
-            (((((reception_buffer[1] & 0x80) >> 7) * 3599)+1)*
+            (((((reception_buffer[1] & 0x80) >> 7) * 3599)+1) *
             ((((reception_buffer[1] & 0x40) >> 6) * 59)+1)));
      
     tab[0] = temp_sample_rate & 0x00FF;
@@ -205,10 +265,6 @@ void configure_sensor(void) {
 }
 
 void clean_data(void) {
-    NOP();
-}
-
-void get_data_number(void) {
     NOP();
 }
 
