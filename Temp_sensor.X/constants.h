@@ -55,7 +55,7 @@
 #define CLEAN_DATA_SIZE         0x00
 #define GET_DATA_NUMBER_SIZE    0x00
 #define PING_NUMBER_SIZE        0x00
-#define GET_REAL_TIME_INFO      0x00
+#define GET_REAL_TIME_INFO_S    0x00
 
 // I2C constants
 #define CONTROL_BYTE_WRITE      0x90

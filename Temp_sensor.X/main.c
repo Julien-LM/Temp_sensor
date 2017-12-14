@@ -108,6 +108,10 @@ void main(void) {
                 if(check_arg_size(PING_NUMBER_SIZE)) {
                     ping();
                 }
+            } else if(received_command == GET_REAL_TIME_INFO) {
+                if(check_arg_size(GET_REAL_TIME_INFO_S)) {
+                    get_real_time_info();
+                }
             } else {
                 return_UART_error(reception_buffer[0], UNKNOWN_COMMAND);
             }
