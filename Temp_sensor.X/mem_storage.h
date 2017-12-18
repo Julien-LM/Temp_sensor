@@ -34,25 +34,25 @@ void add_data_long(long data, MEM* mem){
     add_data_char((data & 0xFF000000) >> 24, mem);
 }
 
-void store_data(MEM* mem, Time time, unsigned char* temp_real) {
-    if(!(*mem).time_info_storage) {
-        (*mem).time_info_storage = 1;
-        add_data_char(TIME_TRANSFERT_IND, mem);
-        add_data_char(time.century, mem);
-        add_data_char(time.years, mem);
-        add_data_char(time.months, mem);
-        add_data_char(time.days, mem);
-        add_data_char(time.hours, mem);
-        add_data_char(time.minutes, mem);
-        add_data_char(time.seconds, mem);
-    }
-    if(!(*mem).sample_rate_info_storage) {
-        (*mem).sample_rate_info_storage = 1;
-        add_data_char(S_RATE_TRANSFERT_IND, mem);
-        add_data_long((*mem).temp_sample_rate, mem);
-    }
+void store_data(MEM* mem, unsigned char* temp_real) {
     add_data_char(temp_real[1], mem);
     add_data_char(temp_real[0], mem);
+}
+
+void store_time(MEM* mem, Time time) {
+    add_data_char(TIME_TRANSFERT_IND, mem);
+    add_data_char(time.century, mem);
+    add_data_char(time.years, mem);
+    add_data_char(time.months, mem);
+    add_data_char(time.days, mem);
+    add_data_char(time.hours, mem);
+    add_data_char(time.minutes, mem);
+    add_data_char(time.seconds, mem);
+}
+
+void store_sample_rate(MEM* mem) {
+    add_data_char(S_RATE_TRANSFERT_IND, mem);
+    add_data_long((*mem).temp_sample_rate, mem);
 }
 
 void get_temp(MEM* mem) {

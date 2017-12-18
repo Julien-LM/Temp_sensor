@@ -35,16 +35,6 @@ void init_OSC(void) {
     // XTAL = 500KHz, efficient 125kHz
 }
 
-void init_timer2(void) {
-    // Fosc = 4MHz
-    // Fcy = 1MHz
-    PR2 = 0x7D;             // value set to 125
-    T2CONbits.TMR2ON = 1;   //Timer2 is on
-    T2CONbits.T2CKPS = 2;   // Prescaler is 16
-    T2CONbits.T2OUTPS = 4;  // 1:5 Postscaler*/
-    // 100Hz interrupt
-}
-
 void init_timer1(void) {
     T1CONbits.TMR1ON = 1;       // Enable timer1
     T1CONbits.T1CKPS = 3;       // 1:8 Prescale value
@@ -53,8 +43,6 @@ void init_timer1(void) {
     T1CONbits.nT1SYNC = 1;      // Do not synchronize external clock input
     
     T1GCONbits.TMR1GE = 0;      // Timer 1 counts regardless of Timer1 gate fct
-    
-    
 }
 
 void init_interrupt(void) {
@@ -62,12 +50,11 @@ void init_interrupt(void) {
     INTCONbits.GIE = 1;        // Enables all active interrupts
     INTCONbits.PEIE = 1;       // Enables all active peripheral interrupts 
     
-    // timer2 Interruption configuration
-    PIE1bits.TMR2IE = 1;     // Enables the Timer2 to PR2 match interrupt
+    // timer Interruption configuration
     PIE1bits.TMR1IE = 1;     // Enable the Timer1 Gate Acquisition interrupt
     
     // USART Receive Interrupt Enable bit
-    PIE1bits.RCIE = 1;      // Eables the USART receive interrupt
+    PIE1bits.RCIE = 1;      // Enables the USART receive interrupt
 }
 
 void init_UART(void) {
@@ -115,7 +102,6 @@ void init_MSSP1(void) {
 
 void init(void){
     init_OSC();
-    init_timer2();
     init_timer1();
     init_UART();
     init_interrupt();

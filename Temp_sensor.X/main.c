@@ -15,7 +15,6 @@
 #include "time.h"
 #include "i2c.h"
 #include "mem_storage.h"
-#include "interrupt.h"
 #include "ds1624.h"
 
 // Interrupt counter
@@ -30,15 +29,15 @@ MEM mem;
 // Temperature sensor
 unsigned char temp_real[2] = {0};
 
-void check_errors(void);
 void get_real_time_info(void);
-
 
 void main(void) {
     
-    char received_command = 0;
     mem.temp_sample_rate = 5;
     init();
+    
+    store_time(&mem, time);
+    store_sample_rate(&mem);                    
     
     LED_RED = 0;
     LED_ORANGE = 0;
@@ -46,8 +45,57 @@ void main(void) {
     LED_BLUE = 0;
 
     while(1) {
-               
-        check_errors();
+        NOP();
+    }
+    return;
+}
+
+void __interrupt led_blinking(void) {
+    
+    char received_data;
+    char received_command = 0;
+
+    // Timer1 interrupt flag, every second
+    // Timer triggered by quartz
+    if(PIR1bits.TMR1IF) {
+        TMR1IF = 0;
+        TMR1H = 0xF0;
+        // LED blue blinking
+        //LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
+        // Increment time
+        icremente_time(&time);
+        // Temperature sensor conversion
+        if(temp_convert_count == mem.temp_sample_rate-1) {
+            start_convert();
+        }
+        temp_convert_count++;
+        // Read and store data routine
+        if(temp_convert_count == mem.temp_sample_rate) {
+            temp_convert_count = 0;
+            read_temp(temp_real);
+            store_data(&mem, temp_real);
+        }
+    }
+    
+    if(PIR1bits.RCIF) {
+        received_data = RCREG;
+        if(uart.UART_parsing_in_progress) {
+           return_UART_error(received_data, DEVICE_BUSY);
+        } else {
+            //LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
+            uart.UART_reception_buffer[uart.UART_reception_index] = received_data;
+            // Stop incrementing in overflow
+            if(!uart.UART_reception_overflow) {
+                uart.UART_reception_index++;
+            }
+            if(uart.UART_reception_index == RECEPTION_BUFFER_SIZE) {
+               uart.UART_reception_overflow = 1;
+               uart.UART_reception_index = 0;
+               return_UART_error(uart.UART_reception_buffer[0], BUFFER_OVERFLOW);
+           }
+        }
+        
+        check_UART_errors(uart);
         
         if(uart.UART_reception_overflow) {
             if(uart.UART_reception_buffer[uart.UART_reception_index] == START_OF_TEXT) {
@@ -67,13 +115,13 @@ void main(void) {
                 }
             } else if(received_command == SET_TIME) {
                 if(check_arg_size(SET_TIME_SIZE, uart)) {
-                    mem.time_info_storage = 0;
                     set_time(&time, uart.UART_reception_buffer);
+                    store_time(&mem, time);
                 }
             } else if(received_command == CONFIGURE_SENSOR) {
                 if(check_arg_size(CONFIGURE_SENSOR_SIZE, uart)) {
-                    mem.sample_rate_info_storage = 0;
                     configure_sensor(uart, &mem);
+                    store_sample_rate(&mem);
                     uart.UART_reception_index = 0;
                 }
             } else if(received_command == CLEAN_DATA) {
@@ -96,71 +144,11 @@ void main(void) {
                 return_UART_error(uart.UART_reception_buffer[0], UNKNOWN_COMMAND);
             }
             parsing_done(&uart);
-            
-        }
-    }
-
-    return;
-}
-
-void __interrupt led_blinking(void) {
-    
-    char received_data;
-    
-    // Timer2 interrupt flag
-    // 100 Hz interrupt
-    if(PIR1bits.TMR2IF) {
-        TMR2IF = 0;
-        counter++;
-        if(counter >=  100){
-            counter = 0;
-            //LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
-        }
-    }
-    // Timer1 interrupt flag, every second
-    // Timer triggered by quartz
-    if(PIR1bits.TMR1IF) {
-        TMR1IF = 0;
-        TMR1H = 0xF0;
-        LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
-        icremente_time(&time);
-        // Temperature sensor conversion
-        if(temp_convert_count == mem.temp_sample_rate-1) {
-            start_convert();
-        }
-        temp_convert_count++;
-        // Read and store data routine
-        if(temp_convert_count == mem.temp_sample_rate) {
-            temp_convert_count = 0;
-            read_temp(temp_real);
-            store_data(&mem, time, temp_real);
-        }
-    }
-    
-    if(PIR1bits.RCIF) {
-        received_data = RCREG;
-        if(uart.UART_parsing_in_progress) {
-           return_UART_error(received_data, DEVICE_BUSY);
-        } else {
-            //LED_ORANGE ? LED_ORANGE = 0: LED_ORANGE = 1;
-            uart.UART_reception_buffer[uart.UART_reception_index] = received_data;
-            // Stop incrementing in overflow
-            if(!uart.UART_reception_overflow) {
-                uart.UART_reception_index++;
-            }
-            if(uart.UART_reception_index == RECEPTION_BUFFER_SIZE) {
-               uart.UART_reception_overflow = 1;
-               uart.UART_reception_index = 0;
-               return_UART_error(uart.UART_reception_buffer[0], BUFFER_OVERFLOW);
-           }
         }
     }
 }
 
 void get_real_time_info(void) {
     return_UART_answer(GET_REAL_TIME_INFO, temp_real, 2);
-}
-
-void check_errors(void){
-    check_UART_errors(uart);
+    //return_UART_answer(GET_REAL_TIME_INFO, temp_real, 2);
 }

@@ -99,8 +99,6 @@ typedef struct storage_struct MEM;
 struct storage_struct {
     unsigned char data_storage[DATA_STORAGE_SIZE];
     unsigned short data_storage_index;
-    unsigned char time_info_storage;
-    unsigned char sample_rate_info_storage;
     unsigned char data_storage_overflow;
     unsigned long temp_sample_rate;
 };
