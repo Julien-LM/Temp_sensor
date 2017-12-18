@@ -85,6 +85,26 @@ struct Time_struct {
     unsigned char seconds;
 };
 
+// UART reception
+typedef struct UART_struct UART;
+struct UART_struct {
+    unsigned char UART_reception_buffer[RECEPTION_BUFFER_SIZE];
+    unsigned char UART_reception_index;
+    unsigned char UART_parsing_in_progress;
+    unsigned char UART_reception_overflow;
+};
+
+// Temperature storage
+typedef struct storage_struct MEM;
+struct storage_struct {
+    unsigned char data_storage[DATA_STORAGE_SIZE];
+    unsigned short data_storage_index;
+    unsigned char time_info_storage;
+    unsigned char sample_rate_info_storage;
+    unsigned char data_storage_overflow;
+    unsigned long temp_sample_rate;
+};
+
 // PIC16F1829 Configuration Bit Settings
 
 // 'C' source line config statements

@@ -9,7 +9,6 @@
 #ifndef UART_H
 #define	UART_H
 
-
 void send_UART_char(char data) {
     while(!TXSTAbits.TRMT);
     TXREG = data;
@@ -46,6 +45,37 @@ void return_UART_error(char command, char error_code) {
     send_UART_char(command);
     send_UART_char(error_code);
     end_of_transmit();
+}
+
+char check_arg_size(char arg_size, UART uart) {
+    if(uart.UART_reception_index != arg_size + 2) {
+        return_UART_error(uart.UART_reception_buffer[0], WRONG_ARGUMENTS);
+        return 0;
+    } 
+    return 1;
+}
+
+void ping(void) {
+    unsigned char tab[1];
+    tab[0] = PING;
+    return_UART_answer(PING, tab, 1);
+}
+
+void parsing_done(UART* uart) {
+    (*uart).UART_reception_index = 0;
+    (*uart).UART_parsing_in_progress = 0;
+}
+
+void check_UART_errors(UART uart){
+    if(RCSTAbits.OERR == 1) {
+        return_UART_error(uart.UART_reception_buffer[uart.UART_reception_index], OVERRUN_ERROR);
+        RCSTAbits.CREN = 0;
+        RCSTAbits.CREN = 1;
+    }
+    if(RCSTAbits.FERR == 1) {
+        return_UART_error(uart.UART_reception_buffer[uart.UART_reception_index], FRAMING_ERROR);
+        LED_RED = 1;
+    }
 }
 
 #endif	/* UART_H */
