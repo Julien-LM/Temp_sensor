@@ -61,7 +61,7 @@ void __interrupt led_blinking(void) {
         TMR1IF = 0;
         TMR1H = 0xF0;
         // LED blue blinking
-        //LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
+        LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
         // Increment time
         icremente_time(&time);
         // Temperature sensor conversion
@@ -107,7 +107,7 @@ void __interrupt led_blinking(void) {
             
             if(received_command == GET_TEMP) {
                 if(check_arg_size(GET_TEMP_SIZE, uart)) {
-                    get_temp(&mem);
+                    get_temp(&mem, time);
                 }
             } else if(received_command == GET_TIME) {
                 if(check_arg_size(GET_TIME_SIZE, uart)) {
@@ -122,11 +122,11 @@ void __interrupt led_blinking(void) {
                 if(check_arg_size(CONFIGURE_SENSOR_SIZE, uart)) {
                     configure_sensor(uart, &mem);
                     store_sample_rate(&mem);
-                    uart.UART_reception_index = 0;
+                    temp_convert_count = 0;
                 }
             } else if(received_command == CLEAN_DATA) {
                 if(check_arg_size(CLEAN_DATA_SIZE, uart)) {
-                    clean_data(&mem);
+                    clean_data(&mem, time);
                 }
             } else if(received_command == GET_DATA_NUMBER) {
                 if(check_arg_size(GET_DATA_NUMBER_SIZE, uart)) {
@@ -150,5 +150,7 @@ void __interrupt led_blinking(void) {
 
 void get_real_time_info(void) {
     return_UART_answer(GET_REAL_TIME_INFO, temp_real, 2);
-    //return_UART_answer(GET_REAL_TIME_INFO, temp_real, 2);
+    get_data_number(&mem);
+    get_time(time);
+    get_config_sensor(&mem);
 }
