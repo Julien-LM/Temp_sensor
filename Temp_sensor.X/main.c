@@ -10,13 +10,13 @@
 #include <stdio.h>
 #include <math.h>
 #include "constants.h"
+#include "../../General_lib/structures.h"
 #include "init.h"
 #include "UART.h"
 #include "../../General_lib/time.h"
-#include "i2c.h"
+#include "../../General_lib/i2c.h"
 #include "mem_storage.h"
 #include "../../General_lib/ds1624.h"
-#include "../../General_lib/structures.h"
 
 // Interrupt counter
 unsigned char counter = 0;

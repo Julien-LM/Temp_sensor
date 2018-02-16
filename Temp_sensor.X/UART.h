@@ -4,6 +4,7 @@
  * Mail: julien.lemellec@gmail.com
  *
  * Requirements: UART structure
+ *               Constants
  * 
  * Created on December 5, 2017, 12:57 PM
  */

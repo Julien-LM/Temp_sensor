@@ -7,11 +7,11 @@
       <itemPath>constants.h</itemPath>
       <itemPath>init.h</itemPath>
       <itemPath>UART.h</itemPath>
-      <itemPath>i2c.h</itemPath>
       <itemPath>mem_storage.h</itemPath>
       <itemPath>../../General_lib/time.h</itemPath>
       <itemPath>../../General_lib/ds1624.h</itemPath>
       <itemPath>../../General_lib/structures.h</itemPath>
+      <itemPath>../../General_lib/i2c.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
