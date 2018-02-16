@@ -3,6 +3,8 @@
  * Author: Julien LE MELLEC
  * Mail: julien.lemellec@gmail.com
  *
+ * Requirements: Mem structure
+ * 
  * Created on December 18, 2017, 8:29 AM
  */
 
@@ -10,6 +12,7 @@
 #define	MEM_STORAGE_H
 
 #include "constants.h"
+#include "../../General_lib/structures.h"
 
 
 void get_data_number(MEM* mem) {

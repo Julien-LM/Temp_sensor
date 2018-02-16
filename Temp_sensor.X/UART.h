@@ -3,11 +3,15 @@
  * Author: Julien LE MELLEC
  * Mail: julien.lemellec@gmail.com
  *
+ * Requirements: UART structure
+ * 
  * Created on December 5, 2017, 12:57 PM
  */
 
 #ifndef UART_H
 #define	UART_H
+
+#include "../../General_lib/structures.h"
 
 void send_UART_char(char data) {
     while(!TXSTAbits.TRMT);
