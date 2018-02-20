@@ -74,7 +74,7 @@ void clean_data(MEM* mem, Time time) {
 
 void get_temp(MEM* mem, Time time) {
     return_UART_answer(GET_TEMP, (*mem).data_storage, (*mem).data_storage_index);
-        if((*mem).data_storage_overflow == 1) {
+    if((*mem).data_storage_overflow == 1) {
         clean_data(mem, time);
     }
 }
