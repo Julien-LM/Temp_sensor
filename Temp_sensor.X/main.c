@@ -17,6 +17,7 @@
 #include "../../General_lib/i2c.h"
 #include "mem_storage.h"
 #include "../../General_lib/ds1624.h"
+#include "../../General_lib/MAX24AA1025.h"
 
 // Interrupt counter
 unsigned char counter = 0;
@@ -29,11 +30,12 @@ MEM mem;
 
 // Temperature sensor
 unsigned char temp_real[2] = {0};
+unsigned char debug_values[DEBUG_VALUE_NUMBER] = {0x28};
 
 void get_real_time_info(void);
+void get_debug_value(void);
 
 void main(void) {
-    
     mem.temp_sample_rate = 5;
     init();
     
@@ -44,6 +46,11 @@ void main(void) {
     LED_ORANGE = 0;
     LED_GREEN = 0;
     LED_BLUE = 0;
+    
+    EEPROM_write_byte(0x67, 0x00);
+    LED_ORANGE = 1;
+    debug_values[0] = EEPROM_read_random_address(0x00);
+    LED_GREEN = 1;
 
     while(1) {
         NOP();
@@ -133,6 +140,10 @@ void __interrupt led_blinking(void) {
                 if(check_arg_size(GET_DATA_NUMBER_SIZE, uart)) {
                     get_data_number(&mem);
                 }
+            } else if(received_command == GET_DEBUG_VALUES) {
+                if(check_arg_size(GET_DEBUG_VALUES_SIZE, uart)) {
+                    get_debug_value();
+                }
             } else if(received_command == PING) {
                 if(check_arg_size(PING_NUMBER_SIZE, uart)) {
                     ping();
@@ -154,4 +165,8 @@ void get_real_time_info(void) {
     get_data_number(&mem);
     get_time(time);
     get_config_sensor(&mem);
+}
+
+void get_debug_value() {
+    return_UART_answer(GET_DEBUG_VALUES, debug_values, DEBUG_VALUE_NUMBER);
 }

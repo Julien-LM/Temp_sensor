@@ -10,7 +10,8 @@
 #define	CONSTANTS_H
 
 #define RECEPTION_BUFFER_SIZE   20
-#define DATA_STORAGE_SIZE       800
+#define DATA_STORAGE_SIZE       128
+#define DEBUG_VALUE_NUMBER      5
 
 #define _XTAL_FREQ 4000000
 
@@ -40,6 +41,7 @@
 #define GET_DATA_NUMBER         0x32
 #define PING                    0x33
 #define GET_REAL_TIME_INFO      0x34
+#define GET_DEBUG_VALUES        0x35
 
 // Temp data transfer protocol
 #define TIME_TRANSFERT_IND      0xFD
@@ -56,10 +58,15 @@
 #define GET_DATA_NUMBER_SIZE    0x00
 #define PING_NUMBER_SIZE        0x00
 #define GET_REAL_TIME_INFO_S    0x00
+#define GET_DEBUG_VALUES_SIZE   0x00
 
 // I2C constants
 #define CONTROL_BYTE_WRITE      0x90
 #define CONTROL_BYTE_READ       0x91
+
+#define READ_BIT                1
+#define WRITE_BIT               0
+
 #define ACK                     0x00
 #define nACK                    0x01
 #define READ_TEMP               0xAA
@@ -67,6 +74,12 @@
 #define STOP_CONVERT            0x22
 #define ACCESS_MEM              0x17
 #define ACCESS_CONFIG           0xAC
+
+#define CONTROL_CODE_24AA1025   0b1010
+#define CONTROL_CODE_DS1624     0b1001
+// Chip select bits
+#define CHIP_SEL_N0_24AA        0b11
+#define CHIP_SEL_N0_DS1624      0b000
 
 #define LED_RED     PORTCbits.RC0
 #define LED_ORANGE  PORTCbits.RC1
