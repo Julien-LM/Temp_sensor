@@ -49,7 +49,10 @@ void main(void) {
     
     EEPROM_write_byte(0x67, 0x00);
     LED_ORANGE = 1;
+    __delay_ms(500);
+
     debug_values[0] = EEPROM_read_random_address(0x00);
+    //debug_values[0] = 0x67;
     LED_GREEN = 1;
 
     while(1) {
