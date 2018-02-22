@@ -11,6 +11,7 @@
 
 #define RECEPTION_BUFFER_SIZE   20
 #define DATA_STORAGE_SIZE       128
+#define MEM_PAGE_SIZE           128
 #define DEBUG_VALUE_NUMBER      5
 
 #define _XTAL_FREQ 4000000
@@ -78,7 +79,7 @@
 #define CONTROL_CODE_24AA1025   0b1010
 #define CONTROL_CODE_DS1624     0b1001
 // Chip select bits
-#define CHIP_SEL_N0_24AA        0b11
+#define CHIP_SEL_N0_24AA        0b011
 #define CHIP_SEL_N0_DS1624      0b000
 
 #define LED_RED     PORTCbits.RC0
