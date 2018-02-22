@@ -100,6 +100,10 @@ void init_MSSP1(void) {
 
 }
 
+void init_WDT(void) {
+    WDTCONbits.WDTPS = 0b01011;
+}
+
 void init(void){
     init_OSC();
     init_timer1();
@@ -107,6 +111,7 @@ void init(void){
     init_interrupt();
     init_GPIO();
     init_MSSP1();
+    init_WDT();
 }
 
 #endif	/* INIT_H */

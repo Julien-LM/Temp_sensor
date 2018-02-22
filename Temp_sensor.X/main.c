@@ -85,6 +85,8 @@ void __interrupt led_blinking(void) {
     if(PIR1bits.TMR1IF) {
         TMR1IF = 0;
         TMR1H = 0xF0;
+        // CLear watchdog
+        CLRWDT();
         // LED blue blinking
         LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
         // Increment time
