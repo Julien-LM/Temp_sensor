@@ -33,10 +33,10 @@ void add_data_char(char data, MEM* mem) {
 }
 
 void add_data_long(long data, MEM* mem){
-    add_data_char(data & 0x000000FF, mem);
-    add_data_char((data & 0x0000FF00) >> 8, mem);
-    add_data_char((data & 0x00FF0000) >> 16, mem);
     add_data_char((data & 0xFF000000) >> 24, mem);
+    add_data_char((data & 0x00FF0000) >> 16, mem);
+    add_data_char((data & 0x0000FF00) >> 8, mem);
+    add_data_char(data & 0x000000FF, mem);
 }
 
 void store_data(MEM* mem, unsigned char* temp_real) {
@@ -89,7 +89,6 @@ void get_config_sensor(MEM* mem) {
 }
 
 void configure_sensor(UART uart, MEM* mem) {
-    char tab[2] = {0};
     (*mem).temp_sample_rate = ((uart.UART_reception_buffer[1] & 0x3F) *
             (((((uart.UART_reception_buffer[1] & 0x80) >> 7) * 3599)+1) *
             ((((uart.UART_reception_buffer[1] & 0x40) >> 6) * 59)+1)));
