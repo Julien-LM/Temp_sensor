@@ -40,8 +40,8 @@ void add_data_long(long data, MEM* mem){
 }
 
 void store_data(MEM* mem, unsigned char* temp_real) {
-    add_data_char(temp_real[1], mem);
     add_data_char(temp_real[0], mem);
+    add_data_char(temp_real[1], mem);
 }
 
 void store_time(MEM* mem, Time time) {

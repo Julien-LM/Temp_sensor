@@ -40,6 +40,7 @@ void get_debug_value(void);
 void main(void) {
     mem.temp_sample_rate = 5;
     init();
+    init_time(&time);
     
     store_time(&mem, time);
     store_sample_rate(&mem);                    
