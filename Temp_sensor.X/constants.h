@@ -11,8 +11,12 @@
 
 #define RECEPTION_BUFFER_SIZE   20
 #define DATA_STORAGE_SIZE       128
+#define TAMPON_SIZE             20
 #define MEM_PAGE_SIZE           128
+#define TEMPORARY_DATA_SIZE     128
 #define DEBUG_VALUE_NUMBER      5
+
+#define MAX_MAX24AA_SIZE        0x01FFFF
 
 #define _XTAL_FREQ 4000000
 

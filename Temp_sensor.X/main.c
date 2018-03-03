@@ -30,9 +30,9 @@ MEM mem;
 
 // Temperature sensor
 unsigned char temp_real[2] = {0};
-unsigned char debug_values[DEBUG_VALUE_NUMBER] = {0x28};
 
-unsigned char values_to_write[MEM_PAGE_SIZE];
+// Used only for debugging new feature
+unsigned char debug_values[DEBUG_VALUE_NUMBER] = {0x28};
 
 void get_real_time_info(void);
 void get_debug_value(void);
@@ -49,26 +49,6 @@ void main(void) {
     LED_ORANGE = 0;
     LED_GREEN = 0;
     LED_BLUE = 0;
-    
-    int i=0;
-    
-    for(i=0; i<MEM_PAGE_SIZE; i++) {
-        values_to_write[i] = i;
-    }
-    
-    EEPROM_write_page(values_to_write, 0x00000);
-    LED_ORANGE = 1;
-    //__delay_ms(500);
-    EEPROM_read_sequential(0x00005, debug_values, 5);
-    //debug_values[0] = EEPROM_read_random_address(0x00005);
-    //debug_values[0] = 0x67;
-    LED_GREEN = 1;
-    
-    __delay_ms(5000);
-    EEPROM_write_byte(0x40, 0x00);
-    __delay_ms(5000);
-    EEPROM_write_byte(0x45, 0x00);
-
 
     while(1) {
         NOP();
@@ -102,6 +82,10 @@ void __interrupt led_blinking(void) {
             temp_convert_count = 0;
             read_temp(temp_real);
             store_data(&mem, temp_real);
+        }
+        
+        if(mem.page_size_reach) {
+            write_data_storage_in_max24aa(&mem);
         }
     }
     
@@ -188,5 +172,6 @@ void get_real_time_info(void) {
 }
 
 void get_debug_value() {
+    EEPROM_read_sequential(0x00005, debug_values, 5);
     return_UART_answer(GET_DEBUG_VALUES, debug_values, DEBUG_VALUE_NUMBER);
 }

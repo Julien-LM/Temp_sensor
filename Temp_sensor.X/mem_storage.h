@@ -13,13 +13,18 @@
 
 #include "constants.h"
 #include "../../General_lib/structures.h"
+#include "../../General_lib/MAX24AA1025.h"
+
+char temp_data[TEMPORARY_DATA_SIZE];
 
 
 void get_data_number(MEM* mem) {
-    char tab[2] = {0};
-    tab[0] = (*mem).data_storage_index & 0x00FF;
-    tab[1] = ((*mem).data_storage_index & 0xFF00) >> 8;
-    return_UART_answer(GET_DATA_NUMBER, tab, 2);   
+    char tab[4] = {0};
+    tab[0] = (*mem).data_number & 0xFF000000 >> 24;
+    tab[1] = (*mem).data_number & 0x00FF0000 >> 16;
+    tab[2] = (*mem).data_number & 0x0000FF00 >> 8;
+    tab[3] = (*mem).data_number & 0x000000FF;
+    return_UART_answer(GET_DATA_NUMBER, tab, 4);   
 }
 
 void add_data_char(char data, MEM* mem) {
@@ -28,8 +33,30 @@ void add_data_char(char data, MEM* mem) {
         (*mem).data_storage_index++;
     }
     if((*mem).data_storage_index == DATA_STORAGE_SIZE) {
+        (*mem).page_size_reach = 1;
+        (*mem).data_storage_tampon[(*mem).tampon_index] = data;
+        (*mem).tampon_index++;
+    }
+    (*mem).data_number++;
+}
+
+void write_data_storage_in_max24aa(MEM* mem) {
+    int i;
+    EEPROM_write_page((*mem).data_storage, (*mem).address_max24aa);
+    (*mem).address_max24aa += 128;
+    if((*mem).address_max24aa >= MAX_MAX24AA_SIZE) {
         (*mem).data_storage_overflow = 1;
     }
+    (*mem).data_storage_index = 0;
+    (*mem).page_size_reach = 0;
+    
+    // Write tampon data into data storage
+    for(i=0; i<(*mem).tampon_index; i++) {
+        (*mem).data_storage[(*mem).data_storage_index] = 
+                (*mem).data_storage_tampon[(*mem).data_storage_index];
+        (*mem).data_storage_index++;
+    }
+    (*mem).tampon_index = 0;
 }
 
 void add_data_long(long data, MEM* mem){
@@ -61,19 +88,31 @@ void store_sample_rate(MEM* mem) {
 }
 
 void clean_data(MEM* mem, Time time) {
-    int i = 0;
+
+    (*mem).address_max24aa = 0;     // Clear max24aa mem index
+    (*mem).data_storage_index = 0;  // Clear local data storage
+
     (*mem).data_storage_overflow = 0;
-    for(i=0; i < DATA_STORAGE_SIZE; i++) {
-        (*mem).data_storage[i] = 0;
-    }
-    (*mem).data_storage_index = 0;
+    
     store_time(mem, time);
     store_sample_rate(mem);
     return_UART_answer(CLEAN_DATA, 0, 0);
 }
 
-void get_temp(MEM* mem, Time time) {
-    return_UART_answer(GET_TEMP, (*mem).data_storage, (*mem).data_storage_index);
+void get_temp(MEM* mem, Time time) {    
+    int i=0;
+    
+    send_UART_char(ACKNOWLEDGE);
+    send_UART_char(GET_TEMP);
+    
+    while(i <= (*mem).address_max24aa) {
+        EEPROM_read_sequential((*mem).address_max24aa, temp_data, TEMPORARY_DATA_SIZE);
+        send_UART_char_tab(temp_data, TEMPORARY_DATA_SIZE);
+        i+=TEMPORARY_DATA_SIZE;
+    }
+    send_UART_char_tab((*mem).data_storage, (*mem).data_storage_index);
+    end_of_transmit();
+    
     if((*mem).data_storage_overflow == 1) {
         clean_data(mem, time);
     }
