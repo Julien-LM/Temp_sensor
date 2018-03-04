@@ -38,9 +38,9 @@ void get_real_time_info(void);
 void get_debug_value(void);
 
 void main(void) {
-    mem.temp_sample_rate = 5;
     init();
     init_time(&time);
+    init_mem(&mem);
     
     store_time(&mem, time);
     store_sample_rate(&mem);                    
@@ -172,6 +172,6 @@ void get_real_time_info(void) {
 }
 
 void get_debug_value() {
-    EEPROM_read_sequential(0x00005, debug_values, 5);
+    EEPROM_read_sequential(0x0007D, debug_values, 5);
     return_UART_answer(GET_DEBUG_VALUES, debug_values, DEBUG_VALUE_NUMBER);
 }

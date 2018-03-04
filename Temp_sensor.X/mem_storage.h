@@ -20,22 +20,24 @@ char temp_data[TEMPORARY_DATA_SIZE];
 
 void get_data_number(MEM* mem) {
     char tab[4] = {0};
-    tab[0] = (*mem).data_number & 0xFF000000 >> 24;
-    tab[1] = (*mem).data_number & 0x00FF0000 >> 16;
-    tab[2] = (*mem).data_number & 0x0000FF00 >> 8;
-    tab[3] = (*mem).data_number & 0x000000FF;
+    tab[0] = (*mem).data_number & 0x000000FF;
+    tab[1] = ((*mem).data_number & 0x0000FF00) >> 8;
+    tab[2] = ((*mem).data_number & 0x00FF0000) >> 16;
+    tab[3] = ((*mem).data_number & 0xFF000000) >> 24;
     return_UART_answer(GET_DATA_NUMBER, tab, 4);   
 }
 
 void add_data_char(char data, MEM* mem) {
-    if(!(*mem).data_storage_overflow) {
+    if(!(*mem).page_size_reach) {
         (*mem).data_storage[(*mem).data_storage_index] = data;
         (*mem).data_storage_index++;
-    }
-    if((*mem).data_storage_index == DATA_STORAGE_SIZE) {
-        (*mem).page_size_reach = 1;
+    } else {
         (*mem).data_storage_tampon[(*mem).tampon_index] = data;
         (*mem).tampon_index++;
+    }
+    
+    if((*mem).data_storage_index == DATA_STORAGE_SIZE) {
+        (*mem).page_size_reach = 1;
     }
     (*mem).data_number++;
 }
@@ -105,8 +107,8 @@ void get_temp(MEM* mem, Time time) {
     send_UART_char(ACKNOWLEDGE);
     send_UART_char(GET_TEMP);
     
-    while(i <= (*mem).address_max24aa) {
-        EEPROM_read_sequential((*mem).address_max24aa, temp_data, TEMPORARY_DATA_SIZE);
+    while(i < (*mem).address_max24aa) {
+        EEPROM_read_sequential(i, temp_data, TEMPORARY_DATA_SIZE);
         send_UART_char_tab(temp_data, TEMPORARY_DATA_SIZE);
         i+=TEMPORARY_DATA_SIZE;
     }
@@ -132,6 +134,16 @@ void configure_sensor(UART uart, MEM* mem) {
             (((((uart.UART_reception_buffer[1] & 0x80) >> 7) * 3599)+1) *
             ((((uart.UART_reception_buffer[1] & 0x40) >> 6) * 59)+1)));
     get_config_sensor(mem);
+}
+
+void init_mem(MEM* mem) {
+    (*mem).address_max24aa = 0;
+    (*mem).temp_sample_rate = 5;
+    (*mem).data_storage_overflow = 0;
+    (*mem).data_storage_index = 0;
+    (*mem).page_size_reach = 0;
+    (*mem).tampon_index = 0;
+    (*mem).data_number = 0;
 }
 
 #endif	/* MEM_STORAGE_H */
