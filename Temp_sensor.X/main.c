@@ -172,6 +172,18 @@ void get_real_time_info(void) {
 }
 
 void get_debug_value() {
-    EEPROM_read_sequential(0x0007D, debug_values, 5);
-    return_UART_answer(GET_DEBUG_VALUES, debug_values, DEBUG_VALUE_NUMBER);
+    //ADCON0bits.GO_nDONE = 1;
+    ADCON0bits.GO_nDONE = 1;
+    while(ADCON0bits.GO_nDONE) {
+        NOP();
+    }
+    unsigned char tab[1];
+    
+    tab[0] = ADRESH;
+
+    return_UART_answer(GET_DEBUG_VALUES, tab, 1);
+
+    
+    /*EEPROM_read_sequential(0x0007D, debug_values, 5);
+    return_UART_answer(GET_DEBUG_VALUES, debug_values, DEBUG_VALUE_NUMBER);*/
 }

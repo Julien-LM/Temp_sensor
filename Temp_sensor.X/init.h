@@ -15,18 +15,30 @@
 void configuration_reg(void);
 
 void init_GPIO(void) {
+    CPSCON0bits.CPSON = 0;      // CPS module is disabled
     
-    CPSCON0bits.CPSON = 0;   // CPS module is disabled
+    TRISCbits.TRISC0 = 0;       // Configurated as an output
+    TRISCbits.TRISC1 = 0;       // Configurated as an output
+    TRISCbits.TRISC2 = 0;       // Configurated as an output
+    TRISCbits.TRISC3 = 0;       // Configurated as an output
     
-    TRISCbits.TRISC0 = 0;   // Configurated as an output
-    TRISCbits.TRISC1 = 0;   // Configurated as an output
-    TRISCbits.TRISC2 = 0;   // Configurated as an output
-    TRISCbits.TRISC3 = 0;   // Configurated as an output
+    ANSELCbits.ANSC0 = 0;       // Digital I/O
+    ANSELCbits.ANSC1 = 0;       // Digital I/O
+    ANSELCbits.ANSC2 = 0;       // Digital I/O
+    ANSELCbits.ANSC3 = 0;       // Digital I/O
+}
+
+void init_ADC(void) {
+    TRISAbits.TRISA2 = 1;       // Configured as input 
+    ANSELAbits.ANSA2 = 1;       // Analog input
     
-    ANSELCbits.ANSC0 = 0;   // Digital I/O
-    ANSELCbits.ANSC1 = 0;   // Digital I/O
-    ANSELCbits.ANSC2 = 0;   // Digital I/O
-    ANSELCbits.ANSC3 = 0;   // Digital I/O
+    ADCON0bits.CHS = 0b00010;   // AN2
+    ADCON0bits.ADON = 1;        // ADC is enabled
+    
+    ADCON1bits.ADFM = 0;        // Left justified. Six Least Significant bits of ADRESL are set to ?0?
+    ADCON1bits.ADCS = 0b101;    // FOSC/16
+    ADCON1bits.ADNREF = 0;      // V REF - is connected to GND
+    ADCON1bits.ADPREF = 0;      // V REF + is connected to VDD
 }
 
 void init_OSC(void) {
@@ -101,7 +113,7 @@ void init_MSSP1(void) {
 }
 
 void init_WDT(void) {
-    WDTCONbits.WDTPS = 0b01011;
+    WDTCONbits.WDTPS = 0b01111; // 32s WDT
 }
 
 void init(void){
@@ -112,6 +124,7 @@ void init(void){
     init_GPIO();
     init_MSSP1();
     init_WDT();
+    init_ADC();
 }
 
 #endif	/* INIT_H */

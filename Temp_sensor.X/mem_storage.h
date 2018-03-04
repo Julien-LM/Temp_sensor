@@ -93,6 +93,7 @@ void clean_data(MEM* mem, Time time) {
 
     (*mem).address_max24aa = 0;     // Clear max24aa mem index
     (*mem).data_storage_index = 0;  // Clear local data storage
+    (*mem).data_number = 0;
 
     (*mem).data_storage_overflow = 0;
     
