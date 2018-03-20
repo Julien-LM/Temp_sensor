@@ -29,13 +29,14 @@ UART uart;
 MEM mem;
 
 // Temperature sensor
-unsigned char temp_real[2] = {0};
+unsigned char temp_real[2] = {0xFF, 0xFF};
 
 // Used only for debugging new feature
 unsigned char debug_values[DEBUG_VALUE_NUMBER] = {0x28};
 
 void get_real_time_info(void);
 void get_debug_value(void);
+void parsing_received_data(void);
 
 void main(void) {
     init();
@@ -51,15 +52,74 @@ void main(void) {
     LED_BLUE = 0;
 
     while(1) {
-        NOP();
+        parsing_received_data();
     }
     return;
+}
+
+void parsing_received_data(void) {
+    
+    char received_command = 0;
+
+    check_UART_errors(uart);
+        
+    if(uart.UART_reception_overflow) {
+        if(uart.UART_reception_buffer[uart.UART_reception_index] == START_OF_TEXT) {
+            uart.UART_reception_overflow = 0;
+        }
+    } else if(uart.UART_reception_buffer[uart.UART_reception_index - 1] == END_OF_TRANSMIT) {
+        uart.UART_parsing_in_progress = 1;
+        received_command = uart.UART_reception_buffer[0];
+
+        if(received_command == GET_TEMP) {
+            if(check_arg_size(GET_TEMP_SIZE, uart)) {
+                get_temp(&mem, time);
+            }
+        } else if(received_command == GET_TIME) {
+            if(check_arg_size(GET_TIME_SIZE, uart)) {
+                get_time(time);
+            }
+        } else if(received_command == SET_TIME) {
+            if(check_arg_size(SET_TIME_SIZE, uart)) {
+                set_time(&time, uart.UART_reception_buffer);
+                store_time(&mem, time);
+            }
+        } else if(received_command == CONFIGURE_SENSOR) {
+            if(check_arg_size(CONFIGURE_SENSOR_SIZE, uart)) {
+                configure_sensor(uart, &mem);
+                store_sample_rate(&mem);
+                temp_convert_count = 0;
+            }
+        } else if(received_command == CLEAN_DATA) {
+            if(check_arg_size(CLEAN_DATA_SIZE, uart)) {
+                clean_data(&mem, time);
+            }
+        } else if(received_command == GET_DATA_NUMBER) {
+            if(check_arg_size(GET_DATA_NUMBER_SIZE, uart)) {
+                get_data_number(&mem);
+            }
+        } else if(received_command == GET_DEBUG_VALUES) {
+            if(check_arg_size(GET_DEBUG_VALUES_SIZE, uart)) {
+                get_debug_value();
+            }
+        } else if(received_command == PING) {
+            if(check_arg_size(PING_NUMBER_SIZE, uart)) {
+                ping();
+            }
+        } else if(received_command == GET_REAL_TIME_INFO) {
+            if(check_arg_size(GET_REAL_TIME_INFO_S, uart)) {
+                get_real_time_info();
+            }
+        } else {
+            return_UART_error(uart.UART_reception_buffer[0], UNKNOWN_COMMAND);
+        }
+        parsing_done(&uart);
+    }
 }
 
 void __interrupt led_blinking(void) {
     
     char received_data;
-    char received_command = 0;
 
     // Timer1 interrupt flag, every second
     // Timer triggered by quartz
@@ -69,7 +129,7 @@ void __interrupt led_blinking(void) {
         // CLear watchdog
         CLRWDT();
         // LED blue blinking
-        LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
+        //LED_BLUE ? LED_BLUE = 0: LED_BLUE = 1;
         // Increment time
         icremente_time(&time);
         // Temperature sensor conversion
@@ -81,7 +141,9 @@ void __interrupt led_blinking(void) {
         if(temp_convert_count == mem.temp_sample_rate) {
             temp_convert_count = 0;
             read_temp(temp_real);
-            store_data(&mem, temp_real);
+            if(temp_real[0] != 0xFF) {
+                store_data(&mem, temp_real);
+            }
         }
         
         if(mem.page_size_reach) {
@@ -105,61 +167,6 @@ void __interrupt led_blinking(void) {
                uart.UART_reception_index = 0;
                return_UART_error(uart.UART_reception_buffer[0], BUFFER_OVERFLOW);
            }
-        }
-        
-        check_UART_errors(uart);
-        
-        if(uart.UART_reception_overflow) {
-            if(uart.UART_reception_buffer[uart.UART_reception_index] == START_OF_TEXT) {
-                uart.UART_reception_overflow = 0;
-            }
-        } else if(uart.UART_reception_buffer[uart.UART_reception_index - 1] == END_OF_TRANSMIT) {
-            uart.UART_parsing_in_progress = 1;
-            received_command = uart.UART_reception_buffer[0];
-            
-            if(received_command == GET_TEMP) {
-                if(check_arg_size(GET_TEMP_SIZE, uart)) {
-                    get_temp(&mem, time);
-                }
-            } else if(received_command == GET_TIME) {
-                if(check_arg_size(GET_TIME_SIZE, uart)) {
-                    get_time(time);
-                }
-            } else if(received_command == SET_TIME) {
-                if(check_arg_size(SET_TIME_SIZE, uart)) {
-                    set_time(&time, uart.UART_reception_buffer);
-                    store_time(&mem, time);
-                }
-            } else if(received_command == CONFIGURE_SENSOR) {
-                if(check_arg_size(CONFIGURE_SENSOR_SIZE, uart)) {
-                    configure_sensor(uart, &mem);
-                    store_sample_rate(&mem);
-                    temp_convert_count = 0;
-                }
-            } else if(received_command == CLEAN_DATA) {
-                if(check_arg_size(CLEAN_DATA_SIZE, uart)) {
-                    clean_data(&mem, time);
-                }
-            } else if(received_command == GET_DATA_NUMBER) {
-                if(check_arg_size(GET_DATA_NUMBER_SIZE, uart)) {
-                    get_data_number(&mem);
-                }
-            } else if(received_command == GET_DEBUG_VALUES) {
-                if(check_arg_size(GET_DEBUG_VALUES_SIZE, uart)) {
-                    get_debug_value();
-                }
-            } else if(received_command == PING) {
-                if(check_arg_size(PING_NUMBER_SIZE, uart)) {
-                    ping();
-                }
-            } else if(received_command == GET_REAL_TIME_INFO) {
-                if(check_arg_size(GET_REAL_TIME_INFO_S, uart)) {
-                    get_real_time_info();
-                }
-            } else {
-                return_UART_error(uart.UART_reception_buffer[0], UNKNOWN_COMMAND);
-            }
-            parsing_done(&uart);
         }
     }
 }
